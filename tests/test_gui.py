@@ -23,6 +23,10 @@ def test_input_fields_are_mapped_for_existing_tools():
     assert input_kind("file.sha256") == "path"
     assert input_kind("network.dns") == "domain"
     assert input_kind("network.reverse-dns") == "address"
+    assert input_kind("network.subnet-calculator") == "network"
+    assert input_kind("web.url-analyzer") == "url"
+    assert input_kind("web.security-headers") == "url"
+    assert input_kind("web.tls-inspector") == "hostname"
     assert input_kind("system.overview") is None
 
 
@@ -33,7 +37,7 @@ def test_export_action_is_part_of_the_window_class():
 def test_dashboard_summary_reports_tools_categories_and_recent_run(tmp_path):
     store = Store(tmp_path / "dashboard.sqlite3")
     empty = dashboard_summary(store)
-    assert empty["tool_count"] == 17
+    assert empty["tool_count"] == len(search_modules())
     assert empty["category_count"] >= 3
     assert empty["recent_run"] is None
     assert empty["favorite_count"] == 0
