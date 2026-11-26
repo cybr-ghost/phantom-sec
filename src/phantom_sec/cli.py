@@ -66,7 +66,7 @@ def interactive_menu() -> None:
         return
     module = next(item for item in get_modules() if item.module_id == choice)
     kwargs = {}
-    if "path" in module.module_id:
+    if module.module_id.startswith(("file.", "system.disk")):
         kwargs["path"] = Prompt.ask("Local path")
     elif module.module_id == "network.dns":
         kwargs["domain"] = Prompt.ask("Hostname")
