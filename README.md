@@ -2,7 +2,7 @@
 
 **Phantom Sec** is an open-source project for learning about defensive security, responsible OSINT, network basics, and looking after your own computer.
 
-> **Current version: 0.1.0 (early preview).** Phantom Sec is still being built. It currently includes a command-line app, a desktop interface, and 24 built-in tools. It is not a complete security suite.
+> **Current version: 0.1.0 (early preview).** Phantom Sec is still being built. It currently includes a command-line app, a desktop interface, and 27 built-in tools. It is not a complete security suite.
 
 ## New here? Start here
 
@@ -20,7 +20,7 @@ If a command or word is unfamiliar, check the [Beginner's glossary](docs/glossar
 - Create a read-only local system overview with memory, storage, process count, network interfaces, and basic firewall status.
 - Check UFW/firewalld on Linux or Windows Defender Firewall profiles without changing firewall settings.
 - Save a timestamped JSON report of your local system overview.
-- Calculate a file's SHA-256 hash, inspect file details, and check permission bits.
+- Calculate file hashes, inspect file signatures and text structure, find duplicate files, and check permissions.
 - Look up DNS information for a hostname or IP address.
 - Calculate IPv4 and IPv6 subnet boundaries locally.
 - Inspect URL structure without opening the URL.
@@ -29,6 +29,27 @@ If a command or word is unfamiliar, check the [Beginner's glossary](docs/glossar
 - Save a local history of tool runs and export it as JSON or CSV.
 - Save and view simple local preferences.
 - Search and run tools from a desktop interface with a run-history view.
+
+## Downloads
+
+<details>
+<summary><strong>Linux (x86_64)</strong></summary>
+
+Download `Phantom-Sec-x86_64.AppImage` from the latest successful [Linux build](https://github.com/cybr-ghost/phantom-sec/actions/workflows/appimage.yml). Then run:
+
+```bash
+chmod +x Phantom-Sec-x86_64.AppImage
+./Phantom-Sec-x86_64.AppImage
+```
+</details>
+
+<details>
+<summary><strong>Windows 10/11 (x64)</strong></summary>
+
+Download `Phantom-Sec-Setup-x64.exe` for the installer or `Phantom-Sec-Windows-x64.zip` for the portable app from the latest successful [Windows build](https://github.com/cybr-ghost/phantom-sec/actions/workflows/windows.yml).
+</details>
+
+**All versioned downloads:** [GitHub Releases](https://github.com/cybr-ghost/phantom-sec/releases)
 
 ## Install it
 

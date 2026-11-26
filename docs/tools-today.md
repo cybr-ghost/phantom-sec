@@ -25,6 +25,9 @@ This page lists the tools included in the current Phantom Sec preview. The catal
 | `file.metadata` | Shows basic file metadata. |
 | `file.directory-size` | Calculates the size of a directory. |
 | `file.permissions` | Shows permission bits for a local file or folder without changing them. |
+| `file.type-signature` | Identifies common file formats from their leading bytes. It does not execute or validate files. |
+| `file.text-profile` | Reports UTF-8 encoding, line count and newline style without displaying text contents. Files are limited to 10 MiB. |
+| `file.duplicate-finder` | Finds byte-identical files under a selected folder, ignores symbolic links and never deletes files. |
 
 ## Network basics
 
@@ -36,7 +39,20 @@ This page lists the tools included in the current Phantom Sec preview. The catal
 
 ## Network intelligence and website security
 
-| Tool ID | What it does |\n|---|---|\n| `network.subnet-calculator` | Calculates IPv4 and IPv6 network boundaries locally without sending traffic. |\n| `web.url-analyzer` | Inspects URL structure and basic indicators locally without opening the URL. |\n| `web.tls-inspector` | Connects to the supplied hostname on port 443 and reads its public TLS certificate. |\n| `web.security-headers` | Sends an HTTP HEAD request and checks common browser security headers. |
+| Tool ID | What it does |
+|---|---|
+| `network.subnet-calculator` | Calculates IPv4 and IPv6 network boundaries locally without sending traffic. |
+| `web.url-analyzer` | Inspects URL structure and basic indicators locally without opening the URL. |
+| `web.tls-inspector` | Connects to the supplied hostname on port 443 and reads its public TLS certificate. |
+| `web.security-headers` | Sends an HTTP HEAD request and checks common browser security headers. |
+
+## Domain intelligence
+
+| Tool ID | What it does |
+|---|---|
+| `domain.dns-records` | Queries common public DNS record types. |
+| `domain.rdap` | Looks up public domain registration events, status and nameservers. |
+| `domain.certificate-transparency` | Searches public certificate-transparency logs for a domain. |
 
 ## Important limits
 

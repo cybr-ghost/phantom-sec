@@ -26,6 +26,7 @@ A checked box means the feature is present in the repository. It does not mean e
 - [x] Combined read-only local system overview.
 - [x] Memory, battery, process count, disk usage, and hostname checks.
 - [x] File hash, metadata, directory size, and permission checks.
+- [x] File signature identification, text structure profiling, and duplicate-file discovery.
 - [x] Local network interface information.
 - [x] Forward and reverse DNS lookups.
 - [x] Local subnet calculator.

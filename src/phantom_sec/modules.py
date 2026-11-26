@@ -22,6 +22,7 @@ from phantom_sec.computer_checks import (
     process_overview,
 )
 from phantom_sec.network_checks import interfaces, reverse_dns
+from phantom_sec.file_checks import detect_file_type, find_duplicate_files, text_file_profile
 from phantom_sec.web_checks import analyze_url, audit_security_headers, calculate_subnet, inspect_tls
 from phantom_sec.domain_checks import certificate_transparency_search, domain_registration, inspect_dns_records
 
@@ -353,6 +354,9 @@ _MODULES = (
     Module("file.metadata", "File metadata", "File analysis", "Show basic metadata for a local file.", file_metadata),
     Module("file.directory-size", "Directory size", "File analysis", "Calculate regular-file sizes in a directory.", directory_size),
     Module("file.permissions", "File permissions", "File analysis", "Inspect permission bits without changing them.", file_permissions),
+    Module("file.type-signature", "File type detector", "File analysis", "Identify common file formats from their leading bytes without executing them.", detect_file_type),
+    Module("file.text-profile", "Text file profile", "File analysis", "Show encoding and line statistics without displaying file contents.", text_file_profile),
+    Module("file.duplicate-finder", "Duplicate file finder", "File analysis", "Find byte-identical files in a selected folder without modifying anything.", find_duplicate_files),
     Module("network.interfaces", "Network interfaces", "Network diagnostics", "List local network interface names.", interfaces),
     Module("network.dns", "DNS lookup", "Network diagnostics", "Resolve a hostname with the system resolver.", dns_lookup),
     Module("network.reverse-dns", "Reverse DNS", "Network diagnostics", "Look up the PTR hostname for an IP address.", reverse_dns),
