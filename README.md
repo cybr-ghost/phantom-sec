@@ -10,7 +10,7 @@
 2. Follow the installation steps.
 3. Check your setup with `phantom-sec doctor`.
 4. Open the app by running `phantom-sec`.
-5. Choose tools from the menu, or read the [Beginner's User Guide](docs/USER_GUIDE.md).
+5. Open the desktop app with `phantom-sec gui`, or read the [Beginner's User Guide](docs/USER_GUIDE.md).
 
 If a command or word is unfamiliar, check the [Glossary](docs/GLOSSARY.md).
 
@@ -24,6 +24,7 @@ If a command or word is unfamiliar, check the [Glossary](docs/GLOSSARY.md).
 - Look up DNS information for a hostname or IP address.
 - Save a local history of tool runs and export it as JSON or CSV.
 - Save and view simple local preferences.
+- Search and run tools from a native desktop interface with a run-history view.
 
 ## Install it
 
@@ -36,10 +37,14 @@ python -m venv .venv
 source .venv/bin/activate
 python -m pip install -e .
 phantom-sec doctor
-phantom-sec
+phantom-sec gui
 ```
 
 For development and tests, install the extra tools with `python -m pip install -e ".[dev]"`.
+
+## Desktop interface
+
+Launch the graphical desktop app with `phantom-sec gui`. It includes live search across tool names, IDs and descriptions, category filters, contextual input fields, background execution, copyable JSON output, and local run history. The interface uses Python's built-in Tk toolkit and does not add a large GUI dependency.
 
 ## Create a system report
 

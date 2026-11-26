@@ -55,7 +55,7 @@ python -m pip install -e ".[dev]"
 phantom-sec
 ```
 
-You should see the tool catalogue. Choose a tool by entering its ID. Enter `q` to quit.
+The Phantom Sec desktop window opens. Search for a tool, select it, enter any requested value, and choose **Run tool**.
 
 You can also list the tools without opening the menu:
 
@@ -83,4 +83,4 @@ phantom-sec run network.dns --domain example.com
 - **Python is too old:** Install Python 3.10 or newer.
 - **Installation errors:** Check your internet connection and read the error printed in the terminal.
 
-For examples of every current command, see the [Beginner's User Guide](USER_GUIDE.md).
+If the graphical window cannot start, your Python installation may be missing Tk support. On Linux, install the Tk package supplied by your distribution. For examples of every current command, see the [Beginner's User Guide](USER_GUIDE.md).

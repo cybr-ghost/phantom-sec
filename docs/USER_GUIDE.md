@@ -6,6 +6,12 @@ This guide explains how to use the tools included in Phantom Sec today.
 
 Run `phantom-sec doctor` to check that Python, the tool catalogue, and the local history folder are ready.
 
+## Use the desktop app
+
+Run `phantom-sec gui` to open the graphical interface. The **Tool library** tab includes a search field that filters by tool name, ID, description, or category as you type. Select a tool to see its description and any required input, then choose **Run tool**. Results appear in the output panel. You can copy results, clear the panel, and review previous runs in **Run history**. Press `Ctrl+K` to focus the search field.
+
+The GUI runs checks in the background so the window remains responsive. The interface uses Tk, included with many Python installations. Some Linux distributions package Tk separately.
+
 ## Open the tool list
 
 Run:

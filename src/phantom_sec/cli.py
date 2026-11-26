@@ -52,6 +52,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="Where to save the JSON report (default: phantom-sec-report.json)",
     )
     sub.add_parser("menu", help="Open the interactive tool menu")
+    sub.add_parser("gui", help="Open the Phantom Sec desktop interface")
     sub.add_parser("doctor", help="Check whether Phantom Sec is ready to use")
     settings = sub.add_parser("settings", help="View or change simple local preferences")
     settings.add_argument("action", choices=["show", "get", "set"], help="What to do")
@@ -131,6 +132,13 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.command == "doctor":
         return run_doctor()
+    if args.command == "gui":
+        try:
+            from phantom_sec.gui import launch_gui
+            return launch_gui()
+        except RuntimeError as exc:
+            console.print(f"[red]Desktop interface unavailable:[/red] {exc}")
+            return 2
     if args.command == "settings":
         store = Store()
         if args.action == "show":

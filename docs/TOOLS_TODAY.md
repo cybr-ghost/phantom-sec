@@ -1,6 +1,6 @@
 # Tools Available Today
 
-This page lists the tools included in the current Phantom Sec preview.
+This page lists the tools included in the current Phantom Sec preview. Use `phantom-sec gui` to search and launch them from the desktop interface.
 
 ## Computer information
 
