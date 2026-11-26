@@ -67,7 +67,7 @@ class PhantomSecWindow:
         self.root.after(120, self._poll_results)
         self.root.bind("<Control-k>", lambda _event: self.search_entry.focus_set())
         self.root.bind("<Control-K>", lambda _event: self.search_entry.focus_set())
-        self.root.bind("<Return>", lambda _event: self.run_selected())
+        self.input_entry.bind("<Return>", lambda _event: self.run_selected())
 
     def _configure_window(self) -> None:
         self.root.title(f"Phantom Sec {__version__}")
@@ -218,6 +218,8 @@ class PhantomSecWindow:
         self.run_button.pack(side="left")
         ttk.Button(top_actions, text="Copy result", command=self._copy_result).pack(
             side="left", padx=(8, 0))
+        ttk.Button(top_actions, text="Export JSON", command=self._export_output).pack(
+            side="left", padx=(8, 0))
         ttk.Button(top_actions, text="Clear", command=self._clear_result).pack(
             side="left", padx=(8, 0))
         ttk.Label(actions, text="OUTPUT", style="Muted.TLabel").grid(
@@ -280,6 +282,18 @@ class PhantomSecWindow:
 
     def _refresh_catalogue(self) -> None:
         self.tool_list.delete(0, "end")
+        self.selected_module = None
+        self.run_button.configure(state="disabled")
+        self.detail_category.configure(text="TOOL DETAILS")
+        self.detail_title.configure(text="Choose a tool")
+        self.detail_id.configure(text="Select a tool from the library")
+        self.detail_description.configure(
+            text="Search by name, tool ID, or description. Select a result to see details."
+        )
+        self.input_value.set("")
+        self.input_label.configure(text="No input required")
+        self.input_entry.configure(state="disabled")
+        self.browse_button.configure(state="disabled")
         self.visible_modules = search_modules(self.search_value.get(), self.category_value.get())
         for module in self.visible_modules:
             self.tool_list.insert("end", f"{module.name}   ·   {module.module_id}")
@@ -405,3 +419,30 @@ def launch_gui() -> int:
     PhantomSecWindow(root)
     root.mainloop()
     return 0
+
+
+    def _export_output(self) -> None:
+        from tkinter import filedialog, messagebox
+
+        raw = self.output.get("1.0", "end-1c")
+        try:
+            payload = json.loads(raw)
+        except json.JSONDecodeError:
+            messagebox.showinfo("Nothing to export", "Run a tool first to create JSON output.")
+            return
+        destination = filedialog.asksaveasfilename(
+            title="Export tool result",
+            defaultextension=".json",
+            filetypes=[("JSON files", "*.json"), ("All files", "*.*")],
+            initialfile="phantom-sec-result.json",
+        )
+        if not destination:
+            return
+        try:
+            with open(destination, "w", encoding="utf-8") as stream:
+                json.dump(payload, stream, indent=2, ensure_ascii=False, default=str)
+                stream.write("\n")
+        except OSError as exc:
+            messagebox.showerror("Export failed", str(exc))
+            return
+        self.status_value.set(f"JSON exported to {destination}")
