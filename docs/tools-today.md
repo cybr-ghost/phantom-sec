@@ -28,6 +28,8 @@ This page lists the tools included in the current Phantom Sec preview. The catal
 | `file.type-signature` | Identifies common file formats from their leading bytes. It does not execute or validate files. |
 | `file.text-profile` | Reports UTF-8 encoding, line count and newline style without displaying text contents. Files are limited to 10 MiB. |
 | `file.duplicate-finder` | Finds byte-identical files under a selected folder, ignores symbolic links and never deletes files. |
+| `file.archive-inspector` | Lists ZIP/TAR archive entries without extracting them and flags absolute or parent-directory paths that could escape an extraction folder. |
+| `file.entropy-profile` | Measures Shannon byte entropy for a local file, with a 50 MiB limit. High entropy is not a malware verdict. |
 
 ## Network basics
 
@@ -53,12 +55,15 @@ This page lists the tools included in the current Phantom Sec preview. The catal
 | `domain.dns-records` | Queries common public DNS record types. |
 | `domain.rdap` | Looks up public domain registration events, status and nameservers. |
 | `domain.certificate-transparency` | Searches public certificate-transparency logs for a domain. |
+| `domain.email-posture` | Reviews public MX, SPF and DMARC records and explains basic email-domain configuration signals. |
 
 ## Important limits
 
 Domain intelligence tools contact public DNS or RDAP/Certificate Transparency services. They do not access accounts or private registration records.
 
 The firewall check supports UFW and firewalld on Linux, and reads Windows Defender Firewall profile status on Windows. Windows file permission output is limited to access checks for the current process; Windows ACL details are not decoded. If a check cannot confirm status, it reports that limitation rather than guessing.
+
+The archive inspector reads archive metadata only; it never extracts or executes entries. The entropy profile reports statistical byte diversity and cannot determine whether a file is malicious. The email posture check reads public DNS records only; it does not send email or guarantee protection against spoofing.
 
 The system overview is a quick informational snapshot, not a security audit. It does not scan networks, change settings, inspect process command lines, or claim that a device is secure.
 
