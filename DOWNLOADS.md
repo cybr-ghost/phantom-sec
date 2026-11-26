@@ -10,12 +10,12 @@ The Releases page is the only official place to get published installers. Choose
 
 | Your computer | File to choose | What happens next |
 |---|---|---|
-| Windows 10/11, Intel or AMD 64-bit | `Phantom-Sec-Setup-x64.exe` | Opens a normal setup wizard |
-| Windows ARM64 | `Phantom-Sec-Windows-arm64.zip` | Extract the folder and open Phantom-Sec.exe |
-| Linux, Intel or AMD 64-bit | `Phantom-Sec-linux-x86_64.AppImage` | Allow the file to run in its Properties, then double-click it |
-| Linux ARM64 | `Phantom-Sec-linux-arm64.tar.gz` | Extract it, allow the app file to run in Properties, then double-click it |
-| Mac with Intel processor | `Phantom-Sec-macos-x64.zip` | Open the ZIP, then move Phantom Sec to Applications |
-| Mac with Apple Silicon (M1, M2, M3, M4) | `Phantom-Sec-macos-arm64.zip` | Open the ZIP, then move Phantom Sec to Applications |
+| Windows 10/11, Intel or AMD 64-bit | [Phantom-Sec-Setup-x64.exe](https://github.com/cybr-ghost/phantom-sec/releases) | Opens a normal setup wizard |
+| Windows ARM64 | [Phantom-Sec-Windows-arm64.zip](https://github.com/cybr-ghost/phantom-sec/releases) | Extract the folder and open Phantom-Sec.exe |
+| Linux, Intel or AMD 64-bit | [Phantom-Sec-linux-x86_64.AppImage](https://github.com/cybr-ghost/phantom-sec/releases) | Allow the file to run in its Properties, then double-click it |
+| Linux ARM64 | [Phantom-Sec-linux-arm64.tar.gz](https://github.com/cybr-ghost/phantom-sec/releases) | Extract it, allow the app file to run in Properties, then double-click it |
+| Mac with Intel processor | [Phantom-Sec-macos-x64.zip](https://github.com/cybr-ghost/phantom-sec/releases) | Open the ZIP, then move Phantom Sec to Applications |
+| Mac with Apple Silicon (M1, M2, M3, M4) | [Phantom-Sec-macos-arm64.zip](https://github.com/cybr-ghost/phantom-sec/releases) | Open the ZIP, then move Phantom Sec to Applications |
 
 **Not sure which processor you have?** On Windows, open Settings → System → About and look at System type. On macOS, choose Apple menu → About This Mac. On Linux, check Settings → About.
 
