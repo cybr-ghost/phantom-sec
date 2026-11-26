@@ -31,9 +31,7 @@ jobs:
 
       - name: Build standalone desktop executable
         run: |
-          pyinstaller --noconfirm --clean --onefile --name phantom-sec \\
-            --collect-all rich --collect-all dns \\
-            packaging/appimage_entry.py
+          pyinstaller --noconfirm --clean --onefile --name phantom-sec --collect-all rich --collect-all dns packaging/appimage_entry.py
 
       - name: Assemble AppDir
         run: |
@@ -54,9 +52,7 @@ jobs:
 
       - name: Download appimagetool
         run: |
-          curl -L --fail --retry 3 \\
-            https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage \\
-            -o appimagetool
+          curl -L --fail --retry 3 https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage -o appimagetool
           chmod +x appimagetool
 
       - name: Create AppImage
