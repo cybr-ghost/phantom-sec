@@ -9,7 +9,8 @@ import shutil
 import socket
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 from phantom_sec.network_tools import interfaces, reverse_dns
 from phantom_sec.system_tools import environment_summary, memory_info, process_overview
