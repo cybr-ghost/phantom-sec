@@ -14,3 +14,9 @@ def test_settings_round_trip(tmp_path):
     store.set_setting("theme", "dark")
     assert store.get_setting("theme") == "dark"
     assert store.get_setting("missing", "fallback") == "fallback"
+
+def test_all_settings_returns_saved_values(tmp_path):
+    store = Store(tmp_path / "test.sqlite3")
+    store.set_setting("theme", "dark")
+    store.set_setting("language", "en")
+    assert store.all_settings() == {"language": "en", "theme": "dark"}

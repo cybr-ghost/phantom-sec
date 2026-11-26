@@ -47,6 +47,10 @@ def build_parser() -> argparse.ArgumentParser:
     export.add_argument("--output", type=Path, required=True, help="Output file path")
     sub.add_parser("menu", help="Open the interactive tool menu")
     sub.add_parser("doctor", help="Check whether Phantom Sec is ready to use")
+    settings = sub.add_parser("settings", help="View or change simple local preferences")
+    settings.add_argument("action", choices=["show", "get", "set"], help="What to do")
+    settings.add_argument("key", nargs="?", help="Preference name")
+    settings.add_argument("value", nargs="?", help="New preference value (for set)")
     return parser
 
 
@@ -121,6 +125,30 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.command == "doctor":
         return run_doctor()
+    if args.command == "settings":
+        store = Store()
+        if args.action == "show":
+            console.print_json(json.dumps(store.all_settings(), indent=2))
+            return 0
+        if not args.key:
+            console.print("[yellow]Please provide a preference name.[/yellow]")
+            console.print("Example: phantom-sec settings get theme")
+            return 2
+        if args.action == "get":
+            value = store.get_setting(args.key)
+            if value is None:
+                console.print(f"[yellow]No saved value for '{args.key}'.[/yellow]")
+                return 1
+            console.print(f"{args.key} = {value}")
+            return 0
+        if args.action == "set":
+            if args.value is None:
+                console.print("[yellow]Please provide a value to save.[/yellow]")
+                console.print("Example: phantom-sec settings set theme dark")
+                return 2
+            store.set_setting(args.key, args.value)
+            console.print(f"[green]Saved preference:[/green] {args.key} = {args.value}")
+            return 0
     if args.command == "list":
         show_modules()
         return 0

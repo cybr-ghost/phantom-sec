@@ -54,6 +54,12 @@ class Store:
             connection.execute("INSERT INTO settings(key, value) VALUES (?, ?) "
                                "ON CONFLICT(key) DO UPDATE SET value=excluded.value", (key, value))
 
+    def all_settings(self) -> dict[str, str]:
+        """Return saved preferences without exposing database internals."""
+        with self._connect() as connection:
+            rows = connection.execute("SELECT key, value FROM settings ORDER BY key").fetchall()
+        return {key: value for key, value in rows}
+
     def get_setting(self, key: str, default: str | None = None) -> str | None:
         with self._connect() as connection:
             row = connection.execute("SELECT value FROM settings WHERE key=?", (key,)).fetchone()

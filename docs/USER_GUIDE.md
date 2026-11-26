@@ -69,6 +69,16 @@ Phantom Sec saves a local record of tool runs.
 
 History is stored at `~/.local/share/phantom-sec/phantom-sec.sqlite3`. It can include file paths and tool results. Review an export before sharing it.
 
+## Local preferences
+
+Phantom Sec can save small preferences on your computer:
+
+- `phantom-sec settings show` lists saved preferences.
+- `phantom-sec settings get theme` displays the saved value for `theme`.
+- `phantom-sec settings set theme dark` saves `dark` as the value for `theme`.
+
+These settings stay in the local Phantom Sec database. No account or cloud sync is used.
+
 ## Module Workshop
 
 The Workshop can create and check a JSON description file for a future module:
