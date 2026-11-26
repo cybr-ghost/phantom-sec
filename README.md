@@ -32,7 +32,7 @@ If a command or word is unfamiliar, check the [Beginner's glossary](docs/glossar
 
 ## Install it
 
-**Arch Linux and other x86_64 Linux desktops:** download the latest `Phantom-Sec-x86_64.AppImage` from [GitHub Actions releases](https://github.com/cybr-ghost/phantom-sec/releases). Make it executable and launch it:
+**Arch Linux and other x86_64 Linux desktops:** download the latest `Phantom-Sec-x86_64.AppImage` from the successful **Build Linux AppImage** run in the [Actions tab](https://github.com/cybr-ghost/phantom-sec/actions). Tagged version releases will also attach the file to the [Releases page](https://github.com/cybr-ghost/phantom-sec/releases). Make it executable and launch it:
 
 ```bash
 chmod +x Phantom-Sec-x86_64.AppImage
