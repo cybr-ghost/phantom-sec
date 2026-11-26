@@ -34,9 +34,5 @@ jobs:
         run: python -m pip install -e ".[dev]"
       - name: Run test suite
         run: pytest
-      - name: Inspect automatic lint fixes
-        run: |
-          ruff check . --fix || true
-          git diff -- packaging/appimage_entry.py src/phantom_sec/file_checks.py src/phantom_sec/modules.py src/phantom_sec/gui.py
       - name: Run lint checks
         run: ruff check .
