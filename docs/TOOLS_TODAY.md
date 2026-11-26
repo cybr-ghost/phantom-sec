@@ -1,6 +1,6 @@
 # Tools Available Today
 
-This page lists the tools that are actually included in the current Phantom Sec preview. A tool appearing here means it is registered in the current built-in tool list.
+This page lists the tools included in the current Phantom Sec preview.
 
 ## Computer information
 
@@ -8,6 +8,7 @@ This page lists the tools that are actually included in the current Phantom Sec 
 |---|---|
 | `system.info` | Basic operating system and runtime information. |
 | `system.uptime` | Shows how long a Linux computer has been running. |
+| `system.overview` | Combines local system, uptime, memory, storage, process-count, and interface information into one read-only snapshot. |
 | `system.memory` | Memory counters where supported. |
 | `system.process-count` | Counts running processes without collecting command lines. |
 | `system.environment` | A small summary of the local environment. |
@@ -31,14 +32,8 @@ This page lists the tools that are actually included in the current Phantom Sec 
 | `network.dns` | Looks up a hostname. |
 | `network.reverse-dns` | Looks up a hostname for an IP address when available. |
 
-## Not included yet
+## Important limits
 
-The following are ideas for future versions, not features you can use today:
+The system overview is a quick informational snapshot, not a security audit. It does not scan networks, change settings, inspect process command lines, or claim that a device is secure.
 
-- A graphical desktop interface.
-- A larger OSINT research collection.
-- Firewall status checks.
-- More advanced network diagnostics.
-- A reviewed community module library.
-
-See the [Development Plan](WHAT_WE_ARE_BUILDING.md) for the wider plan.
+A graphical interface, firewall status checks, broader OSINT helpers, and a reviewed community module process are not included yet.

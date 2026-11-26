@@ -1,7 +1,5 @@
 # Development Plan
 
-This page separates features that are already in the project from ideas we still want to build.
-
 A checked box means the feature is present in the repository. It does not mean every platform has been fully tested.
 
 ## The foundation
@@ -23,10 +21,12 @@ A checked box means the feature is present in the repository. It does not mean e
 ## Built-in tools
 
 - [x] Basic computer and Python information.
+- [x] Linux uptime information.
+- [x] Combined read-only local system overview.
 - [x] Memory information where supported.
 - [x] Process count without collecting command lines.
 - [x] Disk usage and hostname.
-- [x] File hash, metadata, and directory size.
+- [x] File hash, metadata, directory size, and permission checks.
 - [x] Local network interface names.
 - [x] Forward and reverse DNS lookups.
 - [ ] Local firewall status checks.
@@ -37,18 +37,17 @@ A checked box means the feature is present in the repository. It does not mean e
 
 - [x] Basic automated tests and GitHub Actions workflow.
 - [x] Installation and beginner usage guides.
-- [ ] Fix all current CI formatting and lint issues.
 - [ ] Test supported platforms more thoroughly.
 - [ ] Build a graphical interface.
 - [ ] Create a reviewed community module process.
 - [ ] Publish a documentation website and community space.
 
-## What should happen next?
+## Next milestones
 
 1. Make the current code and automated checks reliable.
-2. Improve the beginner experience.
-3. Add more useful local system and network tools.
+2. Improve the beginner experience and reporting.
+3. Add useful local system and network tools.
 4. Build responsible OSINT helpers.
 5. Plan and build a graphical interface.
 
-Features without a checked box are not included yet.
+Unchecked features are planned, not currently available.

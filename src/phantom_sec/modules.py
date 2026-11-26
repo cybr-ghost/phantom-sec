@@ -59,6 +59,54 @@ def system_uptime(**_: Any) -> dict[str, Any]:
             "note": "Reads the operating system uptime counter only."}
 
 
+def system_overview(**_: Any) -> dict[str, Any]:
+    """Create a quick local snapshot from existing read-only computer checks."""
+    info = system_info()
+    memory = memory_info()
+    disk = disk_usage()
+    processes = process_overview()
+    network = interfaces()
+    uptime = system_uptime()
+    alerts = []
+
+    total_memory = memory.get("MemTotal")
+    available_memory = memory.get("MemAvailable")
+    if total_memory and available_memory is not None:
+        available_percent = round((available_memory / total_memory) * 100, 1)
+        if available_percent < 10:
+            alerts.append({
+                "level": "notice",
+                "area": "memory",
+                "message": f"Available memory is low ({available_percent}% reported available).",
+            })
+
+    if disk["total_bytes"] > 0:
+        free_percent = round((disk["free_bytes"] / disk["total_bytes"]) * 100, 1)
+        if free_percent < 10:
+            alerts.append({
+                "level": "notice",
+                "area": "storage",
+                "message": f"Free disk space is low ({free_percent}% available).",
+            })
+    else:
+        free_percent = None
+
+    return {
+        "scope": "local computer only",
+        "system": info,
+        "uptime": uptime,
+        "memory": memory,
+        "storage": {**disk, "free_percent": free_percent},
+        "processes": processes,
+        "network": network,
+        "notices": alerts,
+        "disclaimer": (
+            "This is an informational system snapshot, not a full security audit. "
+            "It does not scan networks, change settings, or inspect process command lines."
+        ),
+    }
+
+
 def disk_usage(path: str | None = None, **_: Any) -> dict[str, Any]:
     target = Path(path or Path.home()).expanduser().resolve()
     usage = shutil.disk_usage(target)
@@ -157,6 +205,7 @@ def local_hostname(**_: Any) -> dict[str, Any]:
 _MODULES = (
     Module("system.info", "System information", "System", "Show basic OS and runtime information.", system_info),
     Module("system.uptime", "System uptime", "System", "Show how long the computer has been running on Linux.", system_uptime),
+    Module("system.overview", "System overview", "System", "Create a quick read-only snapshot of this computer.", system_overview),
     Module("system.memory", "Memory overview", "System", "Show available memory counters where supported.", memory_info),
     Module("system.process-count", "Process count", "System", "Show a process count without reading process arguments.", process_overview),
     Module("system.environment", "Environment summary", "System", "Show basic local environment information.", environment_summary),

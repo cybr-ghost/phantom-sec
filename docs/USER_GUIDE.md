@@ -1,43 +1,41 @@
 # Beginner's User Guide
 
-This guide explains how to use the tools that are included in Phantom Sec today.
+This guide explains how to use the tools included in Phantom Sec today.
 
 ## First: check your setup
 
 Run `phantom-sec doctor` to check that Python, the tool catalogue, and the local history folder are ready.
 
-## First: how commands work
+## Open the tool list
 
-A command starts with `phantom-sec`. The word after it tells the app what you want to do.
-
-For example:
+Run:
 
 ```bash
 phantom-sec list
 ```
 
-This displays the built-in tool list. The interactive menu also stays open after each tool, so you can run several checks before typing `q` to quit.
+To open the interactive menu, run `phantom-sec`. It stays open after each tool. Type `q` when you want to quit.
 
-To run one tool, use `run` followed by its ID:
+## Your first system overview
 
-```bash
-phantom-sec run system.info
-```
-
-Some tools need extra information. These are called options. For example, a DNS lookup needs a domain:
+The easiest way to get a quick picture of your own computer is:
 
 ```bash
-phantom-sec run network.dns --domain example.com
+phantom-sec run system.overview
 ```
+
+It collects basic local information about the operating system, uptime, memory, storage, process count, and network interface names. It may show a notice if available memory or free disk space is low.
+
+This is an informational snapshot, not a complete security audit. It does not scan other devices or change your computer.
 
 ## Computer information
 
 | Command | What it does |
 |---|---|
 | `phantom-sec run system.info` | Shows basic operating system and Python information. |
-| `phantom-sec run system.uptime` | Shows how long a Linux computer has been running. Other platforms report that this check is not supported yet. |
+| `phantom-sec run system.uptime` | Shows how long a Linux computer has been running. |
 | `phantom-sec run system.memory` | Shows memory information where supported. |
-| `phantom-sec run system.process-count` | Counts running processes. It does not collect their command lines. |
+| `phantom-sec run system.process-count` | Counts running processes without collecting command lines. |
 | `phantom-sec run system.environment` | Shows a small summary of the local environment. |
 | `phantom-sec run system.hostname` | Shows your computer's hostname. |
 | `phantom-sec run system.disk --path ~` | Shows disk space for the selected path. |
@@ -52,8 +50,6 @@ Replace the example path with a file or folder on your computer.
 | `phantom-sec run file.metadata --path ./README.md` | Shows basic file information. |
 | `phantom-sec run file.directory-size --path ./docs` | Calculates the total size of a folder. |
 | `phantom-sec run file.permissions --path ./README.md` | Shows permission bits without changing them. |
-
-These tools are designed to read information, not change your files. The permissions check reports whether group or other users have write access, but does not automatically change anything.
 
 ## Network basics
 
@@ -77,13 +73,9 @@ History is stored at `~/.local/share/phantom-sec/phantom-sec.sqlite3`. It can in
 
 ## Local preferences
 
-Phantom Sec can save small preferences on your computer:
-
 - `phantom-sec settings show` lists saved preferences.
 - `phantom-sec settings get theme` displays the saved value for `theme`.
 - `phantom-sec settings set theme dark` saves `dark` as the value for `theme`.
-
-These settings stay in the local Phantom Sec database. No account or cloud sync is used.
 
 ## Module Workshop
 
@@ -94,8 +86,6 @@ phantom-sec create-module demo.sample "Sample Module" --output module.json
 phantom-sec validate-module module.json
 ```
 
-Important: this checks the description only. Phantom Sec does not currently run code from community modules.
+This checks the description only. Phantom Sec does not currently run code from community modules.
 
-## Need help with a term?
-
-See the [Glossary](GLOSSARY.md) or return to [Getting Started](GETTING_STARTED.md).
+For more terms, see the [Glossary](GLOSSARY.md).

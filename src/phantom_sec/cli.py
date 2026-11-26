@@ -97,7 +97,7 @@ def run_doctor() -> int:
     checks = [
         ("Python version", sys.version_info >= (3, 10), f"{sys.version_info.major}.{sys.version_info.minor}"),
         ("Phantom Sec package", True, __version__),
-        ("Tool catalogue", len(get_modules()) == 14, f"{len(get_modules())} built-in tools found"),
+        ("Tool catalogue", len(get_modules()) == 15, f"{len(get_modules())} built-in tools found"),
     ]
     try:
         data_dir = Path.home() / ".local" / "share" / "phantom-sec"
