@@ -4,12 +4,11 @@ The catalogue and individual tool sessions share one window. Built-in tools run
 through their registered handlers; the input box is a tool parameter, not a shell.
 """
 
-from __future__ import annotations
-
 import json
 import queue
 import threading
 import typing
+from __future__ import annotations
 
 from phantom_sec import __version__
 from phantom_sec.local_history import Store
