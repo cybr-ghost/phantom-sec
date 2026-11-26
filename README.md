@@ -2,9 +2,9 @@
 
 > **[⬇️ DOWNLOAD PHANTOM SEC](DOWNLOADS.md)** · Choose Linux or Windows and follow the simple download steps.
 
-**Phantom Sec** is an open-source project for learning about defensive security, responsible OSINT, network basics, and looking after your own computer.
+**Phantom Sec** is a free, open-source desktop toolkit for defensive security, responsible OSINT, network diagnostics, and system administration. It is licensed under the **GNU General Public License v3.0 (GPL-3.0-only)**. You can inspect, build, modify, and redistribute the source under the terms of that license.
 
-> **Current version: 0.1.0 (early preview).** Phantom Sec is still being built. It currently includes a command-line app, a desktop interface, and 27 built-in tools. It is not a complete security suite.
+> **Current version: 0.1.0 (early preview).** Phantom Sec is actively developed and currently includes a command-line app, a desktop interface, and 27 built-in tools. It is not a complete security suite. Preview builds are not code-signed.
 
 ## New here? Start here
 
@@ -34,7 +34,7 @@ If a command or word is unfamiliar, check the [Beginner's glossary](docs/glossar
 
 ## Downloads
 
-For direct download links and beginner-friendly installation steps, open the **[Phantom Sec Downloads page](DOWNLOADS.md)**.
+For permanent, versioned packages, use the **[GitHub Releases page](https://github.com/cybr-ghost/phantom-sec/releases)**. For platform details and installation help, open the **[Phantom Sec Downloads guide](DOWNLOADS.md)**. Published releases include SHA-256 checksums.
 
 ## Install it
 
@@ -110,6 +110,19 @@ This creates `phantom-sec-report.json` in the current folder. Choose another loc
 
 Use Phantom Sec only on your own devices and networks, or where you have clear permission. Current network tools are basic DNS lookups and local interface information. The system overview is informational, not a full security audit. Third-party module code is not executed.
 
+## Supported release targets
+
+| Platform | Architecture | Package format |
+|---|---|---|
+| Linux | x86_64 | AppImage |
+| Linux | ARM64 | Portable tar.gz |
+| Windows | x64 | Installer and portable ZIP |
+| Windows | ARM64 | Portable ZIP |
+| macOS | Intel x86_64 | App bundle ZIP |
+| macOS | Apple Silicon ARM64 | App bundle ZIP |
+
+32-bit systems and mobile operating systems are not currently supported. These are automated release targets, not a claim that every build has already been tested on physical hardware. A platform should be considered available only when its package is attached to a successful release.
+
 ## Development checks
 
 ```bash
@@ -117,6 +130,17 @@ python -m pip install -e ".[dev]"
 pytest
 ruff check .
 ```
+
+## Open source, security, and transparency
+
+- **Source code:** [Browse the complete source on GitHub](https://github.com/cybr-ghost/phantom-sec/tree/main/src).
+- **License:** [GNU GPL v3.0](LICENSE).
+- **Security policy:** [Report a vulnerability privately](SECURITY.md).
+- **Contributing:** [Read the contribution guide](CONTRIBUTING.md).
+- **Build automation:** [Review the GitHub Actions workflows](.github/workflows).
+- **Integrity:** published release assets include a `SHA256SUMS.txt` file so downloads can be checked for accidental corruption.
+
+Phantom Sec is an early preview, provided without warranty under the GPL. Builds are not currently code-signed, so checksums verify file integrity but do not prove publisher identity.
 
 ## License
 
