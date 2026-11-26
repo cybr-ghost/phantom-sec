@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ctypes
 import hashlib
 import os
 import platform
@@ -34,16 +35,24 @@ def system_info(**_: Any) -> dict[str, Any]:
 
 
 def system_uptime(**_: Any) -> dict[str, Any]:
-    """Show system uptime on Linux without collecting process or user activity."""
-    if platform.system() != "Linux":
-        return {"platform": platform.system(), "uptime_seconds": None,
-                "note": "Uptime is not available through this portable check on this platform."}
-    try:
-        raw_uptime = Path("/proc/uptime").read_text(encoding="ascii").split()[0]
-        uptime_seconds = int(float(raw_uptime))
-    except (OSError, ValueError, IndexError) as exc:
-        return {"platform": "Linux", "uptime_seconds": None,
-                "note": f"Could not read Linux uptime information: {exc}"}
+    """Show OS uptime without collecting process or user activity."""
+    current_platform = platform.system()
+    if current_platform == "Windows":
+        try:
+            uptime_seconds = int(ctypes.windll.kernel32.GetTickCount64() // 1000)
+        except (AttributeError, OSError) as exc:
+            return {"platform": "Windows", "uptime_seconds": None,
+                    "note": f"Could not read Windows uptime: {exc}"}
+    elif current_platform == "Linux":
+        try:
+            raw_uptime = Path("/proc/uptime").read_text(encoding="ascii").split()[0]
+            uptime_seconds = int(float(raw_uptime))
+        except (OSError, ValueError, IndexError) as exc:
+            return {"platform": "Linux", "uptime_seconds": None,
+                    "note": f"Could not read Linux uptime information: {exc}"}
+    else:
+        return {"platform": current_platform, "uptime_seconds": None,
+                "note": "Uptime is not implemented for this platform."}
     days, remainder = divmod(uptime_seconds, 86400)
     hours, remainder = divmod(remainder, 3600)
     minutes, seconds = divmod(remainder, 60)
@@ -55,19 +64,55 @@ def system_uptime(**_: Any) -> dict[str, Any]:
     if minutes or hours or days:
         parts.append(f"{minutes}m")
     parts.append(f"{seconds}s")
-    return {"platform": "Linux", "uptime_seconds": uptime_seconds,
+    return {"platform": current_platform, "uptime_seconds": uptime_seconds,
             "uptime_human": " ".join(parts),
             "note": "Reads the operating system uptime counter only."}
 
 
 def firewall_status(**_: Any) -> dict[str, Any]:
     """Read basic UFW/firewalld status without changing firewall configuration."""
-    if platform.system() != "Linux":
+    current_platform = platform.system()
+    if current_platform == "Windows":
+        executable = shutil.which("powershell") or shutil.which("powershell.exe")
+        if not executable:
+            return {"platform": "Windows", "supported": True, "manager": "Windows Defender Firewall",
+                    "profiles": {}, "note": "PowerShell was not found; firewall status is unknown.",
+                    "read_only": True}
+        command = (
+            "Get-NetFirewallProfile | Select-Object Name, Enabled | "
+            "ConvertTo-Json -Compress"
+        )
+        try:
+            completed = subprocess.run(
+                [executable, "-NoProfile", "-NonInteractive", "-Command", command],
+                capture_output=True, text=True, check=False, timeout=5,
+            )
+            if completed.returncode != 0:
+                detail = (completed.stderr or "PowerShell returned an error.").strip()[:200]
+                return {"platform": "Windows", "supported": True,
+                        "manager": "Windows Defender Firewall", "profiles": {},
+                        "note": f"Could not read firewall profiles: {detail}", "read_only": True}
+            import json
+            raw_profiles = json.loads(completed.stdout or "[]")
+            if isinstance(raw_profiles, dict):
+                raw_profiles = [raw_profiles]
+            profiles = {item["Name"]: bool(item["Enabled"]) for item in raw_profiles
+                        if isinstance(item, dict) and "Name" in item and "Enabled" in item}
+            note = ("Windows Defender Firewall profile status was read."
+                    if profiles else "No firewall profile status was returned.")
+            return {"platform": "Windows", "supported": True,
+                    "manager": "Windows Defender Firewall", "profiles": profiles,
+                    "note": note, "read_only": True}
+        except (OSError, subprocess.TimeoutExpired, ValueError, TypeError, KeyError) as exc:
+            return {"platform": "Windows", "supported": True,
+                    "manager": "Windows Defender Firewall", "profiles": {},
+                    "note": f"Firewall status is unknown: {exc}", "read_only": True}
+    if current_platform != "Linux":
         return {
-            "platform": platform.system(),
+            "platform": current_platform,
             "supported": False,
             "managers": [],
-            "note": "This read-only check currently supports Linux UFW and firewalld only.",
+            "note": "This read-only check currently supports Linux and Windows.",
         }
 
     managers = []
@@ -239,6 +284,15 @@ def file_permissions(path: str | None = None, **_: Any) -> dict[str, Any]:
         details = target.stat()
     except OSError as exc:
         raise ValueError(f"Could not inspect that path: {exc}") from exc
+    if os.name == "nt":
+        return {
+            "path": str(target.resolve()),
+            "type": "directory" if target.is_dir() else "file",
+            "current_user_read": os.access(target, os.R_OK),
+            "current_user_write": os.access(target, os.W_OK),
+            "current_user_execute": os.access(target, os.X_OK),
+            "note": "Windows ACL permissions are not decoded. These flags only report access checks for the current process.",
+        }
     mode = stat.S_IMODE(details.st_mode)
     return {
         "path": str(target.resolve()),
