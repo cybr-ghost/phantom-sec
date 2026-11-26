@@ -35,7 +35,12 @@ from phantom_sec.file_checks import (
     text_file_profile,
 )
 from phantom_sec.network_checks import interfaces, reverse_dns
-from phantom_sec.web_checks import analyze_url, audit_security_headers, calculate_subnet, inspect_tls
+from phantom_sec.web_checks import (
+    analyze_url,
+    audit_security_headers,
+    calculate_subnet,
+    inspect_tls,
+)
 
 
 @dataclass(frozen=True)
