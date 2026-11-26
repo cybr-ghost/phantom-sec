@@ -94,6 +94,8 @@ def interactive_menu() -> None:
             kwargs["domain"] = Prompt.ask("Hostname (example: example.com)")
         elif module.module_id == "network.reverse-dns":
             kwargs["address"] = Prompt.ask("IP address")
+        elif module.module_id.startswith("domain."):
+            kwargs["domain"] = Prompt.ask("Public domain name (example: example.com)")
         try:
             result = run_module(choice, **kwargs)
             Store().record_run(choice, result)
@@ -215,7 +217,8 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "run":
         try:
             result = run_module(args.module_id, path=args.path, domain=args.domain,
-                                address=args.address)
+                                address=args.address, url=args.url, hostname=args.hostname,
+                                network=args.network)
             Store().record_run(args.module_id, result)
         except (ValueError, OSError) as exc:
             console.print(f"[red]Error:[/red] {exc}")

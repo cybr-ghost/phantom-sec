@@ -48,7 +48,7 @@ def input_kind(module_id: str) -> str | None:
     """Return the single input field needed by a built-in tool, if any."""
     if module_id.startswith("file.") or module_id == "system.disk":
         return "path"
-    if module_id == "network.dns":
+    if module_id == "network.dns" or module_id.startswith("domain."):
         return "domain"
     if module_id == "network.reverse-dns":
         return "address"
