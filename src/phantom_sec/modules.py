@@ -8,6 +8,7 @@ import platform
 import shutil
 import socket
 import stat
+import subprocess
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
@@ -59,6 +60,76 @@ def system_uptime(**_: Any) -> dict[str, Any]:
             "note": "Reads the operating system uptime counter only."}
 
 
+def firewall_status(**_: Any) -> dict[str, Any]:
+    """Read basic UFW/firewalld status without changing firewall configuration."""
+    if platform.system() != "Linux":
+        return {
+            "platform": platform.system(),
+            "supported": False,
+            "managers": [],
+            "note": "This read-only check currently supports Linux UFW and firewalld only.",
+        }
+
+    managers = []
+    commands = (
+        ("ufw", ["status"]),
+        ("firewalld", ["--state"]),
+    )
+    for name, arguments in commands:
+        executable = shutil.which("ufw" if name == "ufw" else "firewall-cmd")
+        if not executable:
+            continue
+        try:
+            completed = subprocess.run(
+                [executable, *arguments],
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=3,
+            )
+            output = (completed.stdout or "").strip()
+            if name == "ufw":
+                first_line = output.splitlines()[0].strip().lower() if output else ""
+                if first_line == "status: active":
+                    status = "active"
+                elif first_line == "status: inactive":
+                    status = "inactive"
+                else:
+                    status = "unknown"
+            else:
+                status = "active" if output.lower() == "running" and completed.returncode == 0 else (
+                    "inactive" if output.lower() == "not running" else "unknown"
+                )
+            managers.append({
+                "name": name,
+                "status": status,
+                "details": output.splitlines()[0][:160] if output else (
+                    "No status text returned." if status == "unknown" else ""
+                ),
+            })
+        except subprocess.TimeoutExpired:
+            managers.append({"name": name, "status": "unknown", "details": "Status check timed out."})
+        except OSError as exc:
+            managers.append({"name": name, "status": "unknown", "details": str(exc)[:160]})
+
+    if not managers:
+        note = "Neither UFW nor firewalld was detected. Other firewall systems may still be active."
+    elif any(manager["status"] == "active" for manager in managers):
+        note = "At least one supported firewall manager reports active."
+    elif all(manager["status"] == "inactive" for manager in managers):
+        note = "Detected firewall managers report inactive. Check whether another firewall system is used."
+    else:
+        note = "A definitive status was not available for every detected firewall manager."
+
+    return {
+        "platform": "Linux",
+        "supported": True,
+        "managers": managers,
+        "note": note,
+        "read_only": True,
+    }
+
+
 def system_overview(**_: Any) -> dict[str, Any]:
     """Create a quick local snapshot from existing read-only computer checks."""
     info = system_info()
@@ -67,6 +138,7 @@ def system_overview(**_: Any) -> dict[str, Any]:
     processes = process_overview()
     network = interfaces()
     uptime = system_uptime()
+    firewall = firewall_status()
     alerts = []
 
     total_memory = memory.get("MemTotal")
@@ -99,6 +171,7 @@ def system_overview(**_: Any) -> dict[str, Any]:
         "storage": {**disk, "free_percent": free_percent},
         "processes": processes,
         "network": network,
+        "firewall": firewall,
         "notices": alerts,
         "disclaimer": (
             "This is an informational system snapshot, not a full security audit. "
@@ -206,6 +279,7 @@ _MODULES = (
     Module("system.info", "System information", "System", "Show basic OS and runtime information.", system_info),
     Module("system.uptime", "System uptime", "System", "Show how long the computer has been running on Linux.", system_uptime),
     Module("system.overview", "System overview", "System", "Create a quick read-only snapshot of this computer.", system_overview),
+    Module("system.firewall", "Firewall status", "System", "Check basic UFW and firewalld status without changing settings.", firewall_status),
     Module("system.memory", "Memory overview", "System", "Show available memory counters where supported.", memory_info),
     Module("system.process-count", "Process count", "System", "Show a process count without reading process arguments.", process_overview),
     Module("system.environment", "Environment summary", "System", "Show basic local environment information.", environment_summary),

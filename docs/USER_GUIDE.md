@@ -18,19 +18,31 @@ To open the interactive menu, run `phantom-sec`. It stays open after each tool. 
 
 ## Your first system overview
 
-The easiest way to get a quick picture of your own computer is:
+Run:
 
 ```bash
 phantom-sec run system.overview
 ```
 
-It collects basic local information about the operating system, uptime, memory, storage, process count, and network interface names. It may show a notice if available memory or free disk space is low.
+It collects basic local information about the operating system, uptime, memory, storage, process count, network interface names, and basic firewall status.
+
+The firewall part checks for UFW and firewalld on Linux. It only reads their status. If neither is detected, that does not prove no firewall is active. Other firewall systems may be in use.
 
 This is an informational snapshot, not a complete security audit. It does not scan other devices or change your computer.
 
+## Check firewall status on its own
+
+Run:
+
+```bash
+phantom-sec run system.firewall
+```
+
+This checks UFW and firewalld status on Linux. It does not enable, disable, or edit firewall rules, and it does not use administrator privileges. A result of `unknown` means the status could not be confirmed.
+
 ## Save a system report
 
-To save the overview as a JSON file, run:
+Run:
 
 ```bash
 phantom-sec report

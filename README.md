@@ -2,7 +2,7 @@
 
 **Phantom Sec** is an open-source project for learning about defensive security, responsible OSINT, network basics, and looking after your own computer.
 
-> **Current version: 0.1.0 (early preview).** Phantom Sec is still being built. It currently has a small command-line app and 15 built-in tools. It is not a complete security suite.
+> **Current version: 0.1.0 (early preview).** Phantom Sec is still being built. It currently has a small command-line app and 16 built-in tools. It is not a complete security suite.
 
 ## New here? Start here
 
@@ -17,7 +17,8 @@ If a command or word is unfamiliar, check the [Glossary](docs/GLOSSARY.md).
 ## What can it do today?
 
 - Show basic information about your computer, including Linux uptime.
-- Create a read-only local system overview with memory, storage, process count, and network interface information.
+- Create a read-only local system overview with memory, storage, process count, network interface and basic firewall status information.
+- Check UFW and firewalld status on Linux without changing firewall settings.
 - Save a timestamped JSON report of your local system overview.
 - Calculate a file's SHA-256 hash, inspect file details, and check permission bits.
 - Look up DNS information for a hostname or IP address.
@@ -77,4 +78,4 @@ ruff check .
 
 ## License
 
-GNU GPL-3.0-only. See [LICENSE](LICENSE).
+GNU GPL-3.0-only. See `LICENSE`.
