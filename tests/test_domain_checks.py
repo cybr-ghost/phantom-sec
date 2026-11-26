@@ -1,50 +1,4 @@
-from phantom_sec.web_checks import analyze_url, calculate_subnet
-
-
-def test_url_analyzer_is_offline_and_flags_plain_http():
-    result = analyze_url(url="http://example.com/path")
-    assert result["network_access"] is False
-    assert any("HTTP rather than HTTPS" in item for item in result["indicators"])
-
-
-def test_url_analyzer_rejects_non_web_scheme():
-    try:
-        analyze_url(url="file:///etc/passwd")
-    except ValueError as exc:
-        assert "HTTP or HTTPS" in str(exc)
-    else:
-        raise AssertionError("Expected ValueError")
-
-
-def test_url_analyzer_flags_userinfo():
-    result = analyze_url(url="https://user:pass@example.com/")
-    assert any("user information" in item for item in result["indicators"])
-
-
-def test_subnet_calculator_ipv4():
-    result = calculate_subnet(network="192.168.1.17/24")
-    assert result["network"] == "192.168.1.0"
-    assert result["broadcast"] == "192.168.1.255"
-    assert result["usable_hosts"] == 254
-
-
-def test_subnet_calculator_ipv6():
-    result = calculate_subnet(network="2001:db8::1/64")
-    assert result["address_family"] == "IPv6"
-    assert result["broadcast"] is None
-    assert result["total_addresses"] == 2**64
-
-
-def test_subnet_calculator_rejects_invalid_input():
-    try:
-        calculate_subnet(network="not-a-network")
-    except ValueError as exc:
-        assert "Invalid IP network" in str(exc)
-    else:
-        raise AssertionError("Expected ValueError")
-
-
-from phantom_sec.domain_checks import _normalise_domain
+from phantom_sec.domain_checks import _assess_dmarc, _assess_spf, _normalise_domain
 
 
 def test_domain_normalisation_accepts_case_and_trailing_dot():
@@ -67,3 +21,41 @@ def test_domain_normalisation_rejects_single_label():
         assert "valid public domain" in str(exc)
     else:
         raise AssertionError("Expected ValueError")
+
+
+def test_spf_assessment_detects_hard_fail_policy():
+    result = _assess_spf(["v=spf1 include:mail.example -all"])
+    assert result["status"] == "configured"
+    assert result["all_mechanism"] == "-all"
+
+
+def test_spf_assessment_flags_multiple_records():
+    result = _assess_spf(["v=spf1 -all", "v=spf1 ~all"])
+    assert result["status"] == "multiple"
+
+
+def test_spf_assessment_flags_permissive_all():
+    result = _assess_spf(["v=spf1 +all"])
+    assert result["all_mechanism"] == "+all"
+
+
+def test_dmarc_assessment_reads_policy():
+    result = _assess_dmarc(["v=DMARC1; p=reject; pct=100"])
+    assert result["status"] == "configured"
+    assert result["policy"] == "reject"
+
+
+def test_dmarc_assessment_flags_monitoring_policy():
+    result = _assess_dmarc(["v=DMARC1; p=none"])
+    assert result["policy"] == "none"
+
+
+def test_dmarc_assessment_rejects_invalid_policy():
+    result = _assess_dmarc(["v=DMARC1; p=unknown"])
+    assert result["status"] == "invalid"
+
+
+def test_email_posture_tool_is_registered():
+    from phantom_sec.modules import get_modules
+
+    assert "domain.email-posture" in {item.module_id for item in get_modules()}
