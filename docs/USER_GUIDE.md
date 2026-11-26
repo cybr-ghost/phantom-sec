@@ -69,6 +69,7 @@ The report includes the date and time it was created. It contains information ab
 | `phantom-sec run system.info` | Shows basic operating system and Python information. |
 | `phantom-sec run system.uptime` | Shows how long a Linux computer has been running. |
 | `phantom-sec run system.memory` | Shows memory information where supported. |
+| `phantom-sec run system.battery` | Shows battery charge and status where available. |
 | `phantom-sec run system.process-count` | Counts running processes without collecting command lines. |
 | `phantom-sec run system.environment` | Shows a small summary of the local environment. |
 | `phantom-sec run system.hostname` | Shows your computer's hostname. |

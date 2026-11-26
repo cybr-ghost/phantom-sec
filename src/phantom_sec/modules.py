@@ -15,7 +15,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from phantom_sec.computer_checks import environment_summary, memory_info, process_overview
+from phantom_sec.computer_checks import battery_info, environment_summary, memory_info, process_overview
 from phantom_sec.network_checks import interfaces, reverse_dns
 
 
@@ -335,6 +335,7 @@ _MODULES = (
     Module("system.overview", "System overview", "System", "Create a quick read-only snapshot of this computer.", system_overview),
     Module("system.firewall", "Firewall status", "System", "Check basic UFW and firewalld status without changing settings.", firewall_status),
     Module("system.memory", "Memory overview", "System", "Show available memory counters where supported.", memory_info),
+    Module("system.battery", "Battery status", "System", "Read battery charge and charging status where available.", battery_info),
     Module("system.process-count", "Process count", "System", "Show a process count without reading process arguments.", process_overview),
     Module("system.environment", "Environment summary", "System", "Show basic local environment information.", environment_summary),
     Module("system.disk", "Disk usage", "System", "Show storage usage for a local path.", disk_usage),

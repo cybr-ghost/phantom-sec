@@ -16,7 +16,7 @@ If a command or word is unfamiliar, check the [Glossary](docs/GLOSSARY.md).
 
 ## What can it do today?
 
-- Show basic information about your computer, including Linux uptime.
+- Show basic information about your computer, including uptime and battery status where supported.
 - Create a read-only local system overview with memory, storage, process count, network interface and basic firewall status information.
 - Check UFW and firewalld status on Linux without changing firewall settings.
 - Save a timestamped JSON report of your local system overview.

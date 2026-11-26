@@ -91,3 +91,54 @@ def environment_summary(**_: Any) -> dict[str, Any]:
     return {"platform": platform.system(), "architecture": platform.machine(),
             "python": platform.python_version(), "cpu_count": os.cpu_count(),
             "home_directory": str(Path.home())}
+
+
+
+def battery_info(**_: Any) -> dict[str, Any]:
+    """Read battery charge and status where the operating system exposes it."""
+    current_platform = platform.system()
+    if current_platform == "Windows":
+        class PowerStatus(ctypes.Structure):
+            _fields_ = [
+                ("ACLineStatus", ctypes.c_ubyte),
+                ("BatteryFlag", ctypes.c_ubyte),
+                ("BatteryLifePercent", ctypes.c_ubyte),
+                ("SystemStatusFlag", ctypes.c_ubyte),
+                ("BatteryLifeTime", ctypes.c_ulong),
+                ("BatteryFullLifeTime", ctypes.c_ulong),
+            ]
+
+        status = PowerStatus()
+        kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        if not kernel32.GetSystemPowerStatus(ctypes.byref(status)):
+            return {"platform": "Windows", "available": False,
+                    "note": "Windows did not provide battery status."}
+        if status.BatteryFlag == 128:
+            return {"platform": "Windows", "available": False,
+                    "note": "No battery is present or battery status is unavailable."}
+        percent = status.BatteryLifePercent
+        return {
+            "platform": "Windows",
+            "available": percent <= 100,
+            "charge_percent": percent if percent <= 100 else None,
+            "charging": status.ACLineStatus == 1,
+            "on_ac_power": status.ACLineStatus == 1,
+            "note": "Read from the Windows power status API.",
+        }
+    if current_platform == "Linux":
+        batteries = []
+        for entry in Path("/sys/class/power_supply").glob("BAT*"):
+            try:
+                capacity = int((entry / "capacity").read_text(encoding="ascii").strip())
+                status = (entry / "status").read_text(encoding="ascii").strip()
+                batteries.append({"name": entry.name, "charge_percent": capacity,
+                                  "status": status})
+            except (OSError, ValueError):
+                continue
+        if batteries:
+            return {"platform": "Linux", "available": True, "batteries": batteries,
+                    "note": "Read battery details from the Linux power-supply interface."}
+        return {"platform": "Linux", "available": False,
+                "note": "No readable battery was detected. Desktop computers may not have one."}
+    return {"platform": current_platform, "available": False,
+            "note": "Battery status is not implemented for this platform."}

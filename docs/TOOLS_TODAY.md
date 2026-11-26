@@ -10,7 +10,8 @@ This page lists the tools included in the current Phantom Sec preview. Use `phan
 | `system.uptime` | Shows how long a Linux computer has been running. |
 | `system.overview` | Combines local system, uptime, memory, storage, process-count, interface, and basic firewall information into one read-only snapshot. |
 | `system.firewall` | Checks basic UFW and firewalld status on Linux without changing settings. |
-| `system.memory` | Memory counters where supported. |
+| `system.memory` | Memory counters on supported systems. |
+| `system.battery` | Read battery charge and charging status where available. |
 | `system.process-count` | Counts running processes without collecting command lines. |
 | `system.environment` | A small summary of the local environment. |
 | `system.disk` | Disk usage for a selected path. |
