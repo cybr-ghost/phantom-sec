@@ -1,4 +1,4 @@
-from phantom_sec.gui import input_kind, search_modules
+from phantom_sec.gui import PhantomSecWindow, input_kind, search_modules
 
 
 def test_search_matches_tool_name_id_and_description():
@@ -23,3 +23,7 @@ def test_input_fields_are_mapped_for_existing_tools():
     assert input_kind("network.dns") == "domain"
     assert input_kind("network.reverse-dns") == "address"
     assert input_kind("system.overview") is None
+
+
+def test_export_action_is_part_of_the_window_class():
+    assert callable(getattr(PhantomSecWindow, "_export_output", None))
