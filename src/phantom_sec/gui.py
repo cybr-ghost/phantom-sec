@@ -40,6 +40,7 @@ def dashboard_summary(store: Store) -> dict[str, Any]:
         "tool_count": len(modules),
         "category_count": len({module.category for module in modules}),
         "recent_run": recent[0] if recent else None,
+        "favorite_count": len(store.favorites()),
     }
 
 
@@ -85,7 +86,7 @@ class PhantomSecWindow:
         self.root.title(f"Phantom Sec {__version__}")
         self.root.geometry("1180x760")
         self.root.minsize(900, 620)
-        self.root.configure(background="#0b1020")
+        self.root.configure(background="#171b18")
 
     def _build_styles(self) -> None:
         style = self.ttk.Style(self.root)
@@ -93,40 +94,40 @@ class PhantomSecWindow:
             style.theme_use("clam")
         except self.tk.TclError:
             pass
-        style.configure(".", font=("Segoe UI", 10), background="#11182a",
-                        foreground="#e8edf7")
-        style.configure("TFrame", background="#0b1020")
-        style.configure("Panel.TFrame", background="#11182a")
-        style.configure("TLabel", background="#0b1020", foreground="#e8edf7")
-        style.configure("Muted.TLabel", background="#0b1020", foreground="#91a0b8")
-        style.configure("Panel.TLabel", background="#11182a", foreground="#e8edf7")
+        style.configure(".", font=("Segoe UI", 10), background="#202722",
+                        foreground="#e9e6dc")
+        style.configure("TFrame", background="#171b18")
+        style.configure("Panel.TFrame", background="#202722")
+        style.configure("TLabel", background="#171b18", foreground="#e9e6dc")
+        style.configure("Muted.TLabel", background="#171b18", foreground="#a5aa9b")
+        style.configure("Panel.TLabel", background="#202722", foreground="#e9e6dc")
         style.configure("Title.TLabel", font=("Segoe UI", 22, "bold"),
-                        background="#0b1020", foreground="#f7f9ff")
+                        background="#171b18", foreground="#f2efe5")
         style.configure("Subtitle.TLabel", font=("Segoe UI", 10),
-                        background="#0b1020", foreground="#91a0b8")
+                        background="#171b18", foreground="#a5aa9b")
         style.configure("Section.TLabel", font=("Segoe UI", 13, "bold"),
-                        background="#11182a", foreground="#f7f9ff")
-        style.configure("Accent.TButton", background="#5b7cfa", foreground="#ffffff",
+                        background="#202722", foreground="#f2efe5")
+        style.configure("Accent.TButton", background="#a8c6a0", foreground="#f2efe5",
                         padding=(16, 9), borderwidth=0)
-        style.map("Accent.TButton", background=[("active", "#7892ff"), ("disabled", "#35405e")])
-        style.configure("TButton", padding=(10, 7), background="#202b43",
-                        foreground="#e8edf7", borderwidth=0)
-        style.map("TButton", background=[("active", "#2b3a59")])
-        style.configure("TEntry", fieldbackground="#18233a", foreground="#f7f9ff",
-                        insertcolor="#ffffff", padding=9, borderwidth=0)
-        style.configure("TCombobox", fieldbackground="#18233a", foreground="#f7f9ff",
+        style.map("Accent.TButton", background=[("active", "#bdd4b4"), ("disabled", "#49554a")])
+        style.configure("TButton", padding=(10, 7), background="#303a32",
+                        foreground="#e9e6dc", borderwidth=0)
+        style.map("TButton", background=[("active", "#3c493e")])
+        style.configure("TEntry", fieldbackground="#29322b", foreground="#f2efe5",
+                        insertcolor="#f2efe5", padding=9, borderwidth=0)
+        style.configure("TCombobox", fieldbackground="#29322b", foreground="#f2efe5",
                         padding=7)
-        style.configure("Treeview", background="#11182a", fieldbackground="#11182a",
-                        foreground="#e8edf7", rowheight=31, borderwidth=0)
-        style.configure("Treeview.Heading", background="#202b43", foreground="#cbd5e8",
+        style.configure("Treeview", background="#202722", fieldbackground="#202722",
+                        foreground="#e9e6dc", rowheight=31, borderwidth=0)
+        style.configure("Treeview.Heading", background="#303a32", foreground="#d8c8a8",
                         font=("Segoe UI", 9, "bold"), relief="flat")
-        style.map("Treeview", background=[("selected", "#304477")],
-                  foreground=[("selected", "#ffffff")])
-        style.configure("TNotebook", background="#0b1020", borderwidth=0)
-        style.configure("TNotebook.Tab", background="#18233a", foreground="#cbd5e8",
+        style.map("Treeview", background=[("selected", "#465b49")],
+                  foreground=[("selected", "#f2efe5")])
+        style.configure("TNotebook", background="#171b18", borderwidth=0)
+        style.configure("TNotebook.Tab", background="#29322b", foreground="#d8c8a8",
                         padding=(14, 9))
-        style.map("TNotebook.Tab", background=[("selected", "#11182a")],
-                  foreground=[("selected", "#ffffff")])
+        style.map("TNotebook.Tab", background=[("selected", "#202722")],
+                  foreground=[("selected", "#f2efe5")])
 
     def _build_layout(self) -> None:
         ttk = self.ttk
@@ -135,7 +136,7 @@ class PhantomSecWindow:
         brand = ttk.Frame(header)
         brand.pack(side="left")
         ttk.Label(brand, text="PHANTOM SEC", style="Title.TLabel").pack(anchor="w")
-        ttk.Label(brand, text="DEFENSIVE TOOLKIT  •  LOCAL-FIRST  •  READ-ONLY BY DEFAULT",
+        ttk.Label(brand, text="LOCAL SECURITY WORKBENCH  •  QUIETLY CAPABLE  •  READ-ONLY BY DEFAULT",
                   style="Subtitle.TLabel").pack(anchor="w", pady=(2, 0))
         ttk.Label(header, text=f"v{__version__}", style="Muted.TLabel").pack(side="right", anchor="n")
 
@@ -182,6 +183,9 @@ class PhantomSecWindow:
         self.dashboard_recent = ttk.Label(
             stats, text="Latest run: No runs recorded yet", style="Panel.TLabel")
         self.dashboard_recent.pack(anchor="w", pady=(12, 5))
+        self.dashboard_favorites = ttk.Label(
+            stats, text="Favourite tools: 0", style="Panel.TLabel")
+        self.dashboard_favorites.pack(anchor="w", pady=5)
 
         actions = ttk.Frame(panel, style="Panel.TFrame")
         actions.pack(anchor="w", pady=(12, 0))
@@ -198,6 +202,8 @@ class PhantomSecWindow:
             text=f"Built-in tools: {summary['tool_count']}")
         self.dashboard_categories.configure(
             text=f"Tool categories: {summary['category_count']}")
+        self.dashboard_favorites.configure(
+            text=f"Favourite tools: {summary['favorite_count']}")
         recent = summary["recent_run"]
         if recent:
             stamp = recent["created_at"].replace("T", " ").replace("+00:00", " UTC")
@@ -221,7 +227,7 @@ class PhantomSecWindow:
         self.search_entry.grid(row=1, column=0, sticky="ew", pady=(0, 9))
         self.search_entry.configure(takefocus=True)
         self.search_value.trace_add("write", lambda *_: self._refresh_catalogue())
-        categories = ["All tools", *sorted({item.category for item in get_modules()})]
+        categories = ["All tools", "★ Favourites", *sorted({item.category for item in get_modules()})]
         self.category_box = ttk.Combobox(
             sidebar, textvariable=self.category_value, values=categories,
             state="readonly",
@@ -229,8 +235,8 @@ class PhantomSecWindow:
         self.category_box.grid(row=2, column=0, sticky="ew", pady=(0, 10))
         self.category_box.bind("<<ComboboxSelected>>", lambda _event: self._refresh_catalogue())
         self.tool_list = tk.Listbox(
-            sidebar, bg="#11182a", fg="#e8edf7", selectbackground="#304477",
-            selectforeground="#ffffff", highlightthickness=0, borderwidth=0,
+            sidebar, bg="#202722", fg="#e9e6dc", selectbackground="#465b49",
+            selectforeground="#f2efe5", highlightthickness=0, borderwidth=0,
             activestyle="none", font=("Segoe UI", 10), exportselection=False,
         )
         self.tool_list.grid(row=3, column=0, sticky="nsew")
@@ -277,6 +283,9 @@ class PhantomSecWindow:
         self.run_button = ttk.Button(top_actions, text="Run tool", style="Accent.TButton",
                                      command=self.run_selected, state="disabled")
         self.run_button.pack(side="left")
+        self.favorite_button = ttk.Button(
+            top_actions, text="☆ Add favourite", command=self._toggle_favorite, state="disabled")
+        self.favorite_button.pack(side="left", padx=(8, 0))
         ttk.Button(top_actions, text="Copy result", command=self._copy_result).pack(
             side="left", padx=(8, 0))
         ttk.Button(top_actions, text="Export JSON", command=self._export_output).pack(
@@ -290,8 +299,8 @@ class PhantomSecWindow:
         output_frame.rowconfigure(0, weight=1)
         output_frame.columnconfigure(0, weight=1)
         self.output = tk.Text(
-            output_frame, height=12, wrap="word", bg="#0b1020", fg="#dce6f8",
-            insertbackground="#ffffff", selectbackground="#304477", relief="flat",
+            output_frame, height=12, wrap="word", bg="#171b18", fg="#dce6f8",
+            insertbackground="#f2efe5", selectbackground="#465b49", relief="flat",
             padx=12, pady=10, font=("Cascadia Code", 10),
         )
         self.output.grid(row=0, column=0, sticky="nsew")
@@ -345,6 +354,7 @@ class PhantomSecWindow:
         self.tool_list.delete(0, "end")
         self.selected_module = None
         self.run_button.configure(state="disabled")
+        self.favorite_button.configure(state="disabled", text="☆ Add favourite")
         self.detail_category.configure(text="TOOL DETAILS")
         self.detail_title.configure(text="Choose a tool")
         self.detail_id.configure(text="Select a tool from the library")
@@ -355,7 +365,14 @@ class PhantomSecWindow:
         self.input_label.configure(text="No input required")
         self.input_entry.configure(state="disabled")
         self.browse_button.configure(state="disabled")
-        self.visible_modules = search_modules(self.search_value.get(), self.category_value.get())
+        selected_category = self.category_value.get()
+        self.visible_modules = search_modules(
+            self.search_value.get(),
+            "All tools" if selected_category == "★ Favourites" else selected_category,
+        )
+        if selected_category == "★ Favourites":
+            saved = set(self.store.favorites())
+            self.visible_modules = [item for item in self.visible_modules if item.module_id in saved]
         for module in self.visible_modules:
             self.tool_list.insert("end", f"{module.name}   ·   {module.module_id}")
         if not self.visible_modules:
@@ -387,7 +404,29 @@ class PhantomSecWindow:
             self.input_entry.configure(state="disabled")
             self.browse_button.configure(state="disabled")
         self.run_button.configure(state="normal")
+        self._update_favorite_button()
         self.status_value.set(f"Selected {module.module_id}")
+
+    def _update_favorite_button(self) -> None:
+        if not self.selected_module:
+            self.favorite_button.configure(state="disabled", text="☆ Add favourite")
+            return
+        saved = self.store.is_favorite(self.selected_module.module_id)
+        self.favorite_button.configure(
+            state="normal", text="★ Remove favourite" if saved else "☆ Add favourite")
+
+    def _toggle_favorite(self) -> None:
+        if not self.selected_module:
+            return
+        module_id = self.selected_module.module_id
+        self.store.set_favorite(module_id, not self.store.is_favorite(module_id))
+        self._update_favorite_button()
+        self._refresh_dashboard()
+        if self.category_value.get() == "★ Favourites":
+            self._refresh_catalogue()
+        self.status_value.set(
+            "Favourite updated" if self.store.is_favorite(module_id)
+            else "Favourite removed")
 
     def _browse_path(self) -> None:
         from tkinter import filedialog

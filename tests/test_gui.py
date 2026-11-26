@@ -36,7 +36,14 @@ def test_dashboard_summary_reports_tools_categories_and_recent_run(tmp_path):
     assert empty["tool_count"] == 17
     assert empty["category_count"] >= 3
     assert empty["recent_run"] is None
+    assert empty["favorite_count"] == 0
 
     store.record_run("system.info", {"ok": True})
     summary = dashboard_summary(store)
     assert summary["recent_run"]["module_id"] == "system.info"
+
+
+def test_dashboard_summary_counts_favourites(tmp_path):
+    store = Store(tmp_path / "dashboard-favourites.sqlite3")
+    store.set_favorite("system.info")
+    assert dashboard_summary(store)["favorite_count"] == 1

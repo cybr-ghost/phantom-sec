@@ -30,6 +30,10 @@ class Store:
                 key TEXT PRIMARY KEY,
                 value TEXT NOT NULL
             )""")
+            connection.execute("""CREATE TABLE IF NOT EXISTS favorites (
+                module_id TEXT PRIMARY KEY,
+                added_at TEXT NOT NULL
+            )""")
 
     def _connect(self) -> sqlite3.Connection:
         return sqlite3.connect(self.database)
@@ -48,6 +52,33 @@ class Store:
             ).fetchall()
         return [{"id": row[0], "module_id": row[1], "created_at": row[2],
                  "result": json.loads(row[3])} for row in rows]
+
+    def favorites(self) -> list[str]:
+        """Return saved favourite module IDs in a stable order."""
+        with self._connect() as connection:
+            rows = connection.execute(
+                "SELECT module_id FROM favorites ORDER BY module_id"
+            ).fetchall()
+        return [row[0] for row in rows]
+
+    def is_favorite(self, module_id: str) -> bool:
+        """Check whether a module is saved as a favourite."""
+        with self._connect() as connection:
+            row = connection.execute(
+                "SELECT 1 FROM favorites WHERE module_id=?", (module_id,)
+            ).fetchone()
+        return row is not None
+
+    def set_favorite(self, module_id: str, favorite: bool = True) -> None:
+        """Add or remove a favourite module."""
+        with self._connect() as connection:
+            if favorite:
+                connection.execute(
+                    "INSERT OR IGNORE INTO favorites(module_id, added_at) VALUES (?, ?)",
+                    (module_id, datetime.now(timezone.utc).isoformat()),
+                )
+            else:
+                connection.execute("DELETE FROM favorites WHERE module_id=?", (module_id,))
 
     def set_setting(self, key: str, value: str) -> None:
         with self._connect() as connection:

@@ -20,3 +20,15 @@ def test_all_settings_returns_saved_values(tmp_path):
     store.set_setting("theme", "dark")
     store.set_setting("language", "en")
     assert store.all_settings() == {"language": "en", "theme": "dark"}
+
+
+def test_favourites_can_be_added_removed_and_persisted(tmp_path):
+    database = tmp_path / "favourites.sqlite3"
+    store = Store(database)
+    store.set_favorite("system.info")
+    store.set_favorite("network.dns")
+    assert store.favorites() == ["network.dns", "system.info"]
+    assert store.is_favorite("system.info") is True
+    store.set_favorite("system.info", False)
+    assert store.favorites() == ["network.dns"]
+    assert Store(database).favorites() == ["network.dns"]
