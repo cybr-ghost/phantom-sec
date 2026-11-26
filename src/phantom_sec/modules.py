@@ -15,7 +15,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from phantom_sec.computer_checks import battery_info, environment_summary, memory_info, process_overview
+from phantom_sec.computer_checks import (
+    battery_info,
+    environment_summary,
+    memory_info,
+    process_overview,
+)
 from phantom_sec.network_checks import interfaces, reverse_dns
 
 
