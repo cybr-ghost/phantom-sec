@@ -28,6 +28,22 @@ It collects basic local information about the operating system, uptime, memory, 
 
 This is an informational snapshot, not a complete security audit. It does not scan other devices or change your computer.
 
+## Save a system report
+
+To save the overview as a JSON file, run:
+
+```bash
+phantom-sec report
+```
+
+By default, this creates `phantom-sec-report.json` in the current folder. You can choose another location:
+
+```bash
+phantom-sec report --output ~/Documents/my-system-report.json
+```
+
+The report includes the date and time it was created. It contains information about your computer, so review it before sending it to anyone.
+
 ## Computer information
 
 | Command | What it does |

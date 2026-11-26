@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 from rich.console import Console
@@ -45,6 +46,11 @@ def build_parser() -> argparse.ArgumentParser:
     export = sub.add_parser("export-history", help="Save your local history as a JSON or CSV file")
     export.add_argument("format", choices=["json", "csv"], help="Export format")
     export.add_argument("--output", type=Path, required=True, help="Output file path")
+    report = sub.add_parser("report", help="Create a shareable local system overview report")
+    report.add_argument(
+        "--output", type=Path, default=Path("phantom-sec-report.json"),
+        help="Where to save the JSON report (default: phantom-sec-report.json)",
+    )
     sub.add_parser("menu", help="Open the interactive tool menu")
     sub.add_parser("doctor", help="Check whether Phantom Sec is ready to use")
     settings = sub.add_parser("settings", help="View or change simple local preferences")
@@ -168,6 +174,24 @@ def main(argv: list[str] | None = None) -> int:
         destination = (export_history_csv(rows, args.output) if args.format == "csv"
                        else export_json({"history": rows}, args.output))
         console.print(f"[green]Exported:[/green] {destination}")
+        return 0
+    if args.command == "report":
+        try:
+            snapshot = run_module("system.overview")
+            Store().record_run("system.overview", snapshot)
+            report_data = {
+                "application": "Phantom Sec",
+                "version": __version__,
+                "generated_at": datetime.now(timezone.utc).isoformat(),
+                "report_type": "local_system_overview",
+                "report": snapshot["result"],
+            }
+            destination = export_json(report_data, args.output)
+        except (OSError, ValueError) as exc:
+            console.print(f"[red]Could not create the report:[/red] {exc}")
+            return 2
+        console.print(f"[green]System report saved:[/green] {destination}")
+        console.print("This report contains local device information. Review it before sharing.")
         return 0
     if args.command == "run":
         try:

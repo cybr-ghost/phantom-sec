@@ -18,6 +18,7 @@ If a command or word is unfamiliar, check the [Glossary](docs/GLOSSARY.md).
 
 - Show basic information about your computer, including Linux uptime.
 - Create a read-only local system overview with memory, storage, process count, and network interface information.
+- Save a timestamped JSON report of your local system overview.
 - Calculate a file's SHA-256 hash, inspect file details, and check permission bits.
 - Look up DNS information for a hostname or IP address.
 - Save a local history of tool runs and export it as JSON or CSV.
@@ -38,6 +39,16 @@ phantom-sec
 ```
 
 For development and tests, install the extra tools with `python -m pip install -e ".[dev]"`.
+
+## Create a system report
+
+Run:
+
+```bash
+phantom-sec report
+```
+
+This creates `phantom-sec-report.json` in the current folder. Choose another location with `--output`. The report contains local device information, so review it before sharing.
 
 ## Project guides
 
