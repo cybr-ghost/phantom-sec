@@ -2,7 +2,11 @@
 
 This guide explains how to use the tools that are included in Phantom Sec today.
 
-## First: check your setup\n\nRun `phantom-sec doctor` to check that Python, the tool catalogue, and the local history folder are ready.\n\n## First: how commands work
+## First: check your setup
+
+Run `phantom-sec doctor` to check that Python, the tool catalogue, and the local history folder are ready.
+
+## First: how commands work
 
 A command starts with `phantom-sec`. The word after it tells the app what you want to do.
 
