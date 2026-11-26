@@ -1,5 +1,7 @@
 # Phantom Sec
 
+> **[⬇️ DOWNLOAD PHANTOM SEC](DOWNLOADS.md)** · Choose Linux or Windows and follow the simple download steps.
+
 **Phantom Sec** is an open-source project for learning about defensive security, responsible OSINT, network basics, and looking after your own computer.
 
 > **Current version: 0.1.0 (early preview).** Phantom Sec is still being built. It currently includes a command-line app, a desktop interface, and 27 built-in tools. It is not a complete security suite.
@@ -32,28 +34,11 @@ If a command or word is unfamiliar, check the [Beginner's glossary](docs/glossar
 
 ## Downloads
 
-<details>
-<summary><strong>Linux (x86_64)</strong></summary>
-
-Download `Phantom-Sec-x86_64.AppImage` from the latest successful [Linux build](https://github.com/cybr-ghost/phantom-sec/actions/workflows/appimage.yml). Then run:
-
-```bash
-chmod +x Phantom-Sec-x86_64.AppImage
-./Phantom-Sec-x86_64.AppImage
-```
-</details>
-
-<details>
-<summary><strong>Windows 10/11 (x64)</strong></summary>
-
-Download `Phantom-Sec-Setup-x64.exe` for the installer or `Phantom-Sec-Windows-x64.zip` for the portable app from the latest successful [Windows build](https://github.com/cybr-ghost/phantom-sec/actions/workflows/windows.yml).
-</details>
-
-**All versioned downloads:** [GitHub Releases](https://github.com/cybr-ghost/phantom-sec/releases)
+For direct download links and beginner-friendly installation steps, open the **[Phantom Sec Downloads page](DOWNLOADS.md)**.
 
 ## Install it
 
-Choose the download for your operating system from the latest successful build in the [GitHub Actions tab](https://github.com/cybr-ghost/phantom-sec/actions). Versioned releases will also be published on the [Releases page](https://github.com/cybr-ghost/phantom-sec/releases).
+Use the **[Downloads page](DOWNLOADS.md)** for the direct links and step-by-step instructions. Versioned downloads will also appear on the [Releases page](https://github.com/cybr-ghost/phantom-sec/releases).
 
 ### Linux (x86_64)
 
