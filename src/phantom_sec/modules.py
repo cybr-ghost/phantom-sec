@@ -32,6 +32,33 @@ def system_info(**_: Any) -> dict[str, Any]:
             "cpu_count": os.cpu_count()}
 
 
+def system_uptime(**_: Any) -> dict[str, Any]:
+    """Show system uptime on Linux without collecting process or user activity."""
+    if platform.system() != "Linux":
+        return {"platform": platform.system(), "uptime_seconds": None,
+                "note": "Uptime is not available through this portable check on this platform."}
+    try:
+        raw_uptime = Path("/proc/uptime").read_text(encoding="ascii").split()[0]
+        uptime_seconds = int(float(raw_uptime))
+    except (OSError, ValueError, IndexError) as exc:
+        return {"platform": "Linux", "uptime_seconds": None,
+                "note": f"Could not read Linux uptime information: {exc}"}
+    days, remainder = divmod(uptime_seconds, 86400)
+    hours, remainder = divmod(remainder, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    parts = []
+    if days:
+        parts.append(f"{days}d")
+    if hours or days:
+        parts.append(f"{hours}h")
+    if minutes or hours or days:
+        parts.append(f"{minutes}m")
+    parts.append(f"{seconds}s")
+    return {"platform": "Linux", "uptime_seconds": uptime_seconds,
+            "uptime_human": " ".join(parts),
+            "note": "Reads the operating system uptime counter only."}
+
+
 def disk_usage(path: str | None = None, **_: Any) -> dict[str, Any]:
     target = Path(path or Path.home()).expanduser().resolve()
     usage = shutil.disk_usage(target)
@@ -58,9 +85,9 @@ def file_metadata(path: str | None = None, **_: Any) -> dict[str, Any]:
     target = Path(path).expanduser()
     if not target.is_file():
         raise ValueError("The supplied path is not a regular file.")
-    stat = target.stat()
-    return {"path": str(target.resolve()), "size_bytes": stat.st_size,
-            "modified_time": stat.st_mtime, "suffix": target.suffix.lower()}
+    details = target.stat()
+    return {"path": str(target.resolve()), "size_bytes": details.st_size,
+            "modified_time": details.st_mtime, "suffix": target.suffix.lower()}
 
 
 def directory_size(path: str | None = None, **_: Any) -> dict[str, Any]:
@@ -129,6 +156,7 @@ def local_hostname(**_: Any) -> dict[str, Any]:
 
 _MODULES = (
     Module("system.info", "System information", "System", "Show basic OS and runtime information.", system_info),
+    Module("system.uptime", "System uptime", "System", "Show how long the computer has been running on Linux.", system_uptime),
     Module("system.memory", "Memory overview", "System", "Show available memory counters where supported.", memory_info),
     Module("system.process-count", "Process count", "System", "Show a process count without reading process arguments.", process_overview),
     Module("system.environment", "Environment summary", "System", "Show basic local environment information.", environment_summary),

@@ -35,6 +35,7 @@ phantom-sec run network.dns --domain example.com
 | Command | What it does |
 |---|---|
 | `phantom-sec run system.info` | Shows basic operating system and Python information. |
+| `phantom-sec run system.uptime` | Shows how long a Linux computer has been running. Other platforms report that this check is not supported yet. |
 | `phantom-sec run system.memory` | Shows memory information where supported. |
 | `phantom-sec run system.process-count` | Counts running processes. It does not collect their command lines. |
 | `phantom-sec run system.environment` | Shows a small summary of the local environment. |

@@ -7,6 +7,7 @@ This page lists the tools that are actually included in the current Phantom Sec 
 | Tool ID | What it does |
 |---|---|
 | `system.info` | Basic operating system and runtime information. |
+| `system.uptime` | Shows how long a Linux computer has been running. |
 | `system.memory` | Memory counters where supported. |
 | `system.process-count` | Counts running processes without collecting command lines. |
 | `system.environment` | A small summary of the local environment. |
