@@ -35,6 +35,9 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--path", help="File or folder path for file and disk tools")
     run.add_argument("--domain", help="Hostname for a DNS lookup")
     run.add_argument("--address", help="IP address for a reverse DNS lookup")
+    run.add_argument("--url", help="HTTP or HTTPS URL for web inspection")
+    run.add_argument("--hostname", help="Hostname for TLS certificate inspection")
+    run.add_argument("--network", help="IP network in CIDR notation for subnet calculation")
     workshop = sub.add_parser("validate-module", help="Check a module description file (does not run code)")
     workshop.add_argument("manifest", type=Path, help="Path to the JSON description file")
     create = sub.add_parser("create-module", help="Create a starter JSON description for a future module")
@@ -104,7 +107,7 @@ def run_doctor() -> int:
     checks = [
         ("Python version", sys.version_info >= (3, 10), f"{sys.version_info.major}.{sys.version_info.minor}"),
         ("Phantom Sec package", True, __version__),
-        ("Tool catalogue", len(get_modules()) == 17, f"{len(get_modules())} built-in tools found"),
+        ("Tool catalogue", len(get_modules()) >= 1, f"{len(get_modules())} built-in tools found"),
     ]
     try:
         data_dir = Path.home() / ".local" / "share" / "phantom-sec"

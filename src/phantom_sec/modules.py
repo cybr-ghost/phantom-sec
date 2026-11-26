@@ -22,6 +22,7 @@ from phantom_sec.computer_checks import (
     process_overview,
 )
 from phantom_sec.network_checks import interfaces, reverse_dns
+from phantom_sec.web_checks import analyze_url, audit_security_headers, calculate_subnet, inspect_tls
 
 
 @dataclass(frozen=True)
@@ -354,6 +355,10 @@ _MODULES = (
     Module("network.interfaces", "Network interfaces", "Network diagnostics", "List local network interface names.", interfaces),
     Module("network.dns", "DNS lookup", "Network diagnostics", "Resolve a hostname with the system resolver.", dns_lookup),
     Module("network.reverse-dns", "Reverse DNS", "Network diagnostics", "Look up the PTR hostname for an IP address.", reverse_dns),
+    Module("network.subnet-calculator", "Subnet calculator", "Network intelligence", "Calculate network ranges and address boundaries locally.", calculate_subnet),
+    Module("web.url-analyzer", "URL structure analyzer", "Website security", "Inspect URL structure and basic indicators without contacting the URL.", analyze_url),
+    Module("web.tls-inspector", "TLS certificate inspector", "Website security", "Inspect a hostname’s public TLS certificate on port 443.", inspect_tls),
+    Module("web.security-headers", "Security headers auditor", "Website security", "Review common browser security headers using an HTTP HEAD request.", audit_security_headers),
 )
 
 

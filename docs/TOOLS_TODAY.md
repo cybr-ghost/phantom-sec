@@ -1,6 +1,6 @@
 # Tools Available Today
 
-This page lists the tools included in the current Phantom Sec preview. Use `phantom-sec gui` to search and launch them from the desktop interface.
+This page lists the tools included in the current Phantom Sec preview. The catalogue is designed to grow; each tool has a unique ID and a distinct purpose. Use `phantom-sec gui` to search and launch them from the desktop interface.
 
 ## Computer information
 
@@ -34,10 +34,10 @@ This page lists the tools included in the current Phantom Sec preview. Use `phan
 | `network.dns` | Looks up a hostname. |
 | `network.reverse-dns` | Looks up a hostname for an IP address when available. |
 
-## Important limits
+## Network intelligence and website security\n\n| Tool ID | What it does |\n|---|---|\n| `network.subnet-calculator` | Calculates IPv4 and IPv6 network boundaries locally without sending traffic. |\n| `web.url-analyzer` | Inspects URL structure and basic indicators locally without opening the URL. |\n| `web.tls-inspector` | Connects to the supplied hostname on port 443 and reads its public TLS certificate. |\n| `web.security-headers` | Sends an HTTP HEAD request and checks common browser security headers. |\n\n## Important limits
 
 The firewall check supports UFW and firewalld on Linux, and reads Windows Defender Firewall profile status on Windows. Windows file permission output is limited to access checks for the current process; Windows ACL details are not decoded. If a check cannot confirm status, it reports that limitation rather than guessing.
 
 The system overview is a quick informational snapshot, not a security audit. It does not scan networks, change settings, inspect process command lines, or claim that a device is secure.
 
-A graphical interface, broader OSINT helpers, and a reviewed community module process are not included yet.
+Broader OSINT helpers, additional website checks, and a reviewed community module process are not included yet. TLS and HTTP checks contact the supplied hostname. Use them only where you have permission.
