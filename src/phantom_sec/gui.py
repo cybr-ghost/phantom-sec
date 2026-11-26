@@ -4,11 +4,12 @@ The catalogue and individual tool sessions share one window. Built-in tools run
 through their registered handlers; the input box is a tool parameter, not a shell.
 """
 
+from __future__ import annotations
+
 import json
 import queue
 import threading
-import typing
-from __future__ import annotations
+from typing import Any
 
 from phantom_sec import __version__
 from phantom_sec.local_history import Store
@@ -41,7 +42,7 @@ def search_modules(query: str = "", category: str = "All tools") -> list[Module]
     ]
 
 
-def dashboard_summary(store: Store) -> dict[str, typing.Any]:
+def dashboard_summary(store: Store) -> dict[str, Any]:
     """Return local catalogue and activity statistics."""
     modules = get_modules()
     recent = store.history(1)
