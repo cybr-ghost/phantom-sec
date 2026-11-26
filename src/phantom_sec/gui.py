@@ -403,12 +403,11 @@ class PhantomSecWindow:
         if kind:
             self.input_label.configure(text={
                 "path": "File / folder path",
-                "domain": "Hostname",
+                "domain": "Public domain name",
                 "address": "IP address",
                 "network": "IP network (CIDR)",
                 "hostname": "Hostname",
                 "url": "HTTP or HTTPS URL",
-                "domain": "Public domain name",
             }[kind])
             self.input_entry.configure(state="normal")
             self.browse_button.configure(state="normal" if kind == "path" else "disabled")
