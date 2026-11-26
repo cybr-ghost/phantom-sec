@@ -1,4 +1,4 @@
-"""Low-impact network inventory and DNS diagnostics."""
+"""Basic, low-impact network information and DNS checks."""
 
 from __future__ import annotations
 

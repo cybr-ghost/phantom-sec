@@ -1,6 +1,6 @@
 import json
 
-from phantom_sec.workshop import validate_manifest
+from phantom_sec.module_workshop import validate_manifest
 
 
 def test_valid_manifest_is_metadata_only(tmp_path):

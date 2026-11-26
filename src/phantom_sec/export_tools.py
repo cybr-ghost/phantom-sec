@@ -1,4 +1,4 @@
-"""Privacy-conscious local report export helpers."""
+"""Helpers for exporting local Phantom Sec reports."""
 
 from __future__ import annotations
 

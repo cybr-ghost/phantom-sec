@@ -1,4 +1,4 @@
-from phantom_sec.network_tools import interfaces, reverse_dns
+from phantom_sec.network_checks import interfaces, reverse_dns
 
 
 def test_interfaces_returns_list():

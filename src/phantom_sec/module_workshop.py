@@ -1,4 +1,4 @@
-"""Safe module-manifest validation. This module never imports or executes plugins."""
+"""Validate module description files. Community code is never executed."""
 
 from __future__ import annotations
 
@@ -37,7 +37,7 @@ def validate_manifest(path: Path) -> dict[str, Any]:
 
 
 def write_template(destination: Path, module_id: str, name: str) -> Path:
-    """Create a JSON manifest template only; no executable plugin source is generated."""
+    """Create a JSON description template only, not executable plugin code."""
     manifest = {
         "id": module_id,
         "name": name,

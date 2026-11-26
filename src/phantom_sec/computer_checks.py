@@ -1,4 +1,4 @@
-"""Portable, read-only local system inspection helpers."""
+"""Portable, read-only checks about the local computer."""
 
 from __future__ import annotations
 

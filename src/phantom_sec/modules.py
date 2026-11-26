@@ -1,4 +1,4 @@
-"""Built-in, read-only modules. No third-party module code is executed."""
+"""Built-in, read-only tools. No third-party module code is executed."""
 
 from __future__ import annotations
 
@@ -7,13 +7,13 @@ import os
 import platform
 import shutil
 import socket
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from collections.abc import Callable
 from typing import Any
 
-from phantom_sec.network_tools import interfaces, reverse_dns
-from phantom_sec.system_tools import environment_summary, memory_info, process_overview
+from phantom_sec.computer_checks import environment_summary, memory_info, process_overview
+from phantom_sec.network_checks import interfaces, reverse_dns
 
 
 @dataclass(frozen=True)

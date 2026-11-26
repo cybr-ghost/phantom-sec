@@ -1,4 +1,4 @@
-from phantom_sec.storage import Store
+from phantom_sec.local_history import Store
 
 
 def test_history_round_trip(tmp_path):
