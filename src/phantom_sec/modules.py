@@ -6,8 +6,8 @@ import hashlib
 import os
 import platform
 import shutil
-import stat
 import socket
+import stat
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
