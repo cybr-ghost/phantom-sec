@@ -21,10 +21,21 @@ from phantom_sec.computer_checks import (
     memory_info,
     process_overview,
 )
+from phantom_sec.domain_checks import (
+    certificate_transparency_search,
+    domain_registration,
+    email_domain_posture,
+    inspect_dns_records,
+)
+from phantom_sec.file_checks import (
+    detect_file_type,
+    file_entropy_profile,
+    find_duplicate_files,
+    inspect_archive,
+    text_file_profile,
+)
 from phantom_sec.network_checks import interfaces, reverse_dns
-from phantom_sec.file_checks import detect_file_type, find_duplicate_files, text_file_profile
 from phantom_sec.web_checks import analyze_url, audit_security_headers, calculate_subnet, inspect_tls
-from phantom_sec.domain_checks import certificate_transparency_search, domain_registration, inspect_dns_records
 
 
 @dataclass(frozen=True)
@@ -357,6 +368,8 @@ _MODULES = (
     Module("file.type-signature", "File type detector", "File analysis", "Identify common file formats from their leading bytes without executing them.", detect_file_type),
     Module("file.text-profile", "Text file profile", "File analysis", "Show encoding and line statistics without displaying file contents.", text_file_profile),
     Module("file.duplicate-finder", "Duplicate file finder", "File analysis", "Find byte-identical files in a selected folder without modifying anything.", find_duplicate_files),
+    Module("file.archive-inspector", "Archive inspector", "File analysis", "Review ZIP and TAR contents and flag unsafe paths without extracting files.", inspect_archive),
+    Module("file.entropy-profile", "File entropy profile", "File analysis", "Measure byte entropy for a local file without displaying its contents.", file_entropy_profile),
     Module("network.interfaces", "Network interfaces", "Network diagnostics", "List local network interface names.", interfaces),
     Module("network.dns", "DNS lookup", "Network diagnostics", "Resolve a hostname with the system resolver.", dns_lookup),
     Module("network.reverse-dns", "Reverse DNS", "Network diagnostics", "Look up the PTR hostname for an IP address.", reverse_dns),
@@ -367,6 +380,7 @@ _MODULES = (
     Module("domain.dns-records", "DNS record inspector", "Domain intelligence", "Inspect A, AAAA, MX, TXT, NS, SOA and CAA records.", inspect_dns_records),
     Module("domain.rdap", "Domain registration lookup", "Domain intelligence", "Retrieve public RDAP registration events, status and nameservers.", domain_registration),
     Module("domain.certificate-transparency", "Certificate transparency search", "Domain intelligence", "Find publicly logged TLS certificates for a domain and its subdomains.", certificate_transparency_search),
+    Module("domain.email-posture", "Email domain posture", "Domain intelligence", "Review public MX, SPF, and DMARC DNS configuration for an email domain.", email_domain_posture),
 )
 
 
