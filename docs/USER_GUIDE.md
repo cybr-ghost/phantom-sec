@@ -46,8 +46,9 @@ Replace the example path with a file or folder on your computer.
 | `phantom-sec run file.sha256 --path ./README.md` | Calculates a SHA-256 fingerprint of a file. |
 | `phantom-sec run file.metadata --path ./README.md` | Shows basic file information. |
 | `phantom-sec run file.directory-size --path ./docs` | Calculates the total size of a folder. |
+| `phantom-sec run file.permissions --path ./README.md` | Shows permission bits without changing them. |
 
-These tools are designed to read information, not change your files.
+These tools are designed to read information, not change your files. The permissions check reports whether group or other users have write access, but does not automatically change anything.
 
 ## Network basics
 

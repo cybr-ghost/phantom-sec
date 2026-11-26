@@ -20,6 +20,7 @@ This page lists the tools that are actually included in the current Phantom Sec 
 | `file.sha256` | Calculates a file's SHA-256 hash. |
 | `file.metadata` | Shows basic file metadata. |
 | `file.directory-size` | Calculates the size of a directory. |
+| `file.permissions` | Shows permission bits for a local file or folder without changing them. |
 
 ## Network basics
 

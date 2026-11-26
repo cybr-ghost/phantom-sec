@@ -6,6 +6,7 @@ import hashlib
 import os
 import platform
 import shutil
+import stat
 import socket
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -79,6 +80,36 @@ def directory_size(path: str | None = None, **_: Any) -> dict[str, Any]:
     return {"path": str(root.resolve()), "files": count, "total_bytes": total}
 
 
+def file_permissions(path: str | None = None, **_: Any) -> dict[str, Any]:
+    """Read permission bits for a local file or folder without changing it."""
+    if not path:
+        raise ValueError("Provide --path to a file or folder.")
+    target = Path(path).expanduser()
+    if target.is_symlink():
+        raise ValueError("Symbolic links are not checked. Provide the target path instead.")
+    try:
+        details = target.stat()
+    except OSError as exc:
+        raise ValueError(f"Could not inspect that path: {exc}") from exc
+    mode = stat.S_IMODE(details.st_mode)
+    return {
+        "path": str(target.resolve()),
+        "type": "directory" if target.is_dir() else "file",
+        "permissions_octal": format(mode, "04o"),
+        "owner_read": bool(mode & stat.S_IRUSR),
+        "owner_write": bool(mode & stat.S_IWUSR),
+        "owner_execute": bool(mode & stat.S_IXUSR),
+        "group_read": bool(mode & stat.S_IRGRP),
+        "group_write": bool(mode & stat.S_IWGRP),
+        "group_execute": bool(mode & stat.S_IXGRP),
+        "other_read": bool(mode & stat.S_IROTH),
+        "other_write": bool(mode & stat.S_IWOTH),
+        "other_execute": bool(mode & stat.S_IXOTH),
+        "world_writable": bool(mode & stat.S_IWOTH),
+        "note": "Read-only permission check. It does not change file permissions.",
+    }
+
+
 def dns_lookup(domain: str | None = None, **_: Any) -> dict[str, Any]:
     if not domain:
         raise ValueError("Provide --domain with a hostname.")
@@ -106,6 +137,7 @@ _MODULES = (
     Module("file.sha256", "SHA-256 file hash", "File analysis", "Hash a file without modifying it.", file_hash),
     Module("file.metadata", "File metadata", "File analysis", "Show basic metadata for a local file.", file_metadata),
     Module("file.directory-size", "Directory size", "File analysis", "Calculate regular-file sizes in a directory.", directory_size),
+    Module("file.permissions", "File permissions", "File analysis", "Inspect permission bits without changing them.", file_permissions),
     Module("network.interfaces", "Network interfaces", "Network diagnostics", "List local network interface names.", interfaces),
     Module("network.dns", "DNS lookup", "Network diagnostics", "Resolve a hostname with the system resolver.", dns_lookup),
     Module("network.reverse-dns", "Reverse DNS", "Network diagnostics", "Look up the PTR hostname for an IP address.", reverse_dns),

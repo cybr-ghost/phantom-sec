@@ -2,7 +2,7 @@
 
 **Phantom Sec** is an open-source project for learning about defensive security, responsible OSINT, network basics, and looking after your own computer.
 
-> **Current version: 0.1.0 (early preview).** Phantom Sec is still being built. It currently has a small command-line app and 12 built-in tools. It is not a complete security suite.
+> **Current version: 0.1.0 (early preview).** Phantom Sec is still being built. It currently has a small command-line app and 13 built-in tools. It is not a complete security suite.
 
 ## New here? Start here
 
@@ -21,7 +21,7 @@ If a command or word is unfamiliar, check the [Glossary](docs/GLOSSARY.md).
 - Show basic information about your computer.
 - Show memory and disk usage.
 - Count running processes without collecting their command lines.
-- Calculate a file's SHA-256 hash and show basic file details.
+- Calculate a file's SHA-256 hash, inspect file details, and check permission bits.
 - Show local network interface names.
 - Look up DNS information for a hostname or IP address.
 - Save a local history of tool runs.
