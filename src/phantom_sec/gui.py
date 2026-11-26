@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 import queue
 import threading
-from typing import Any
+import typing
 
 from phantom_sec import __version__
 from phantom_sec.local_history import Store
@@ -42,7 +42,7 @@ def search_modules(query: str = "", category: str = "All tools") -> list[Module]
     ]
 
 
-def dashboard_summary(store: Store) -> dict[str, Any]:
+def dashboard_summary(store: Store) -> dict[str, typing.Any]:
     """Return local catalogue and activity statistics."""
     modules = get_modules()
     recent = store.history(1)
@@ -74,7 +74,7 @@ def input_kind(module_id: str) -> str | None:
 class PhantomSecWindow:
     """Single-window terminal-style Phantom Sec application."""
 
-    def __init__(self, root: Any):
+    def __init__(self, root: typing.Any):
         import tkinter as tk
         from tkinter import ttk
 
@@ -82,7 +82,7 @@ class PhantomSecWindow:
         self.ttk = ttk
         self.root = root
         self.store = Store()
-        self.results: queue.Queue[tuple[str, Any]] = queue.Queue()
+        self.results: queue.Queue[tuple[str, typing.Any]] = queue.Queue()
         self.selected_module: Module | None = None
         self.visible_modules: list[Module] = []
         self.input_value = tk.StringVar()
@@ -234,12 +234,12 @@ class PhantomSecWindow:
             self.tool_list.insert("end", "No matching tools")
         self.status_value.set(f"{len(modules)} TOOLS SHOWN  ·  {mode}")
 
-    def _catalogue_selection(self, _event: Any = None) -> None:
+    def _catalogue_selection(self, _event: typing.Any = None) -> None:
         selection = self.tool_list.curselection()
         if selection and selection[0] < len(self.visible_modules):
             self.status_value.set(f"SELECTED  ·  {self.visible_modules[selection[0]].module_id}")
 
-    def _open_selected(self, _event: Any = None) -> None:
+    def _open_selected(self, _event: typing.Any = None) -> None:
         selection = self.tool_list.curselection()
         if not selection or selection[0] >= len(self.visible_modules):
             return
