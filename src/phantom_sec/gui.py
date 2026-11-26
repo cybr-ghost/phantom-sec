@@ -52,6 +52,12 @@ def input_kind(module_id: str) -> str | None:
         return "domain"
     if module_id == "network.reverse-dns":
         return "address"
+    if module_id == "network.subnet-calculator":
+        return "network"
+    if module_id in {"web.url-analyzer", "web.security-headers"}:
+        return "url"
+    if module_id == "web.tls-inspector":
+        return "hostname"
     return None
 
 
@@ -85,7 +91,6 @@ class PhantomSecWindow:
     def _configure_window(self) -> None:
         self.root.title(f"Phantom Sec {__version__}")
         self.root.geometry("1180x760")
-        self.root.minsize(900, 620)
         self.root.minsize(900, 620)
         self.root.configure(background="#171b18")
 
@@ -441,7 +446,7 @@ class PhantomSecWindow:
 
         if not self.selected_module:
             return
-        if self.selected_module.module_id in {"file.directory-size", "system.disk"}:
+        if self.selected_module.module_id in {"file.directory-size", "file.duplicate-finder", "system.disk"}:
             chosen = filedialog.askdirectory()
         else:
             chosen = filedialog.askopenfilename()
