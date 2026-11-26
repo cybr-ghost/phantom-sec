@@ -1,0 +1,131 @@
+name: Build and publish release packages
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build ${{ matrix.label }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: Linux x86_64
+            target: linux-x64
+            runner: ubuntu-22.04
+          - label: Linux ARM64
+            target: linux-arm64
+            runner: ubuntu-24.04-arm
+          - label: Windows x64
+            target: windows-x64
+            runner: windows-latest
+          - label: Windows ARM64
+            target: windows-arm64
+            runner: windows-11-arm
+          - label: macOS Intel
+            target: macos-x64
+            runner: macos-15-intel
+          - label: macOS Apple Silicon
+            target: macos-arm64
+            runner: macos-15
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install project and packager
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e . pyinstaller
+      - name: Build Linux x86_64 AppImage
+        if: matrix.target == 'linux-x64'
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libfuse2
+          pyinstaller --noconfirm --clean --onefile --name phantom-sec --collect-all rich --collect-all dns packaging/appimage_entry.py
+          mkdir -p AppDir/usr/bin AppDir/usr/share/applications AppDir/usr/share/icons/hicolor/scalable/apps
+          install -m 755 dist/phantom-sec AppDir/usr/bin/phantom-sec
+          install -m 644 packaging/phantom-sec.desktop AppDir/usr/share/applications/phantom-sec.desktop
+          install -m 644 packaging/phantom-sec.svg AppDir/usr/share/icons/hicolor/scalable/apps/phantom-sec.svg
+          cp packaging/phantom-sec.svg AppDir/phantom-sec.svg
+          printf '#!/bin/sh\nHERE="$(dirname "$(readlink -f "$0")")"\nexport PATH="$HERE/usr/bin:$PATH"\nexec "$HERE/usr/bin/phantom-sec" "$@"\n' > AppDir/AppRun
+          chmod 755 AppDir/AppRun
+          ln -sf usr/share/applications/phantom-sec.desktop AppDir/phantom-sec.desktop
+          ln -sf usr/share/icons/hicolor/scalable/apps/phantom-sec.svg AppDir/.DirIcon
+          curl -L --fail --retry 3 https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage -o appimagetool
+          chmod +x appimagetool
+          ARCH=x86_64 ./appimagetool AppDir Phantom-Sec-linux-x86_64.AppImage
+      - name: Build Linux ARM64 archive
+        if: matrix.target == 'linux-arm64'
+        shell: bash
+        run: |
+          pyinstaller --noconfirm --clean --onefile --name phantom-sec --collect-all rich --collect-all dns packaging/appimage_entry.py
+          mkdir -p package
+          cp dist/phantom-sec package/
+          printf 'Phantom Sec for Linux ARM64\nExtract and run: ./phantom-sec\n' > package/README.txt
+          chmod +x package/phantom-sec
+          tar -czf Phantom-Sec-linux-arm64.tar.gz -C package .
+      - name: Build Windows x64 packages
+        if: matrix.target == 'windows-x64'
+        shell: pwsh
+        run: |
+          pyinstaller --noconfirm --clean --onefile --windowed --name Phantom-Sec --collect-all rich --collect-all dns packaging/appimage_entry.py
+          Compress-Archive -Path dist/Phantom-Sec.exe -DestinationPath Phantom-Sec-Windows-x64.zip
+          choco install innosetup --yes --no-progress
+          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" packaging/windows-installer.iss
+      - name: Build Windows ARM64 portable package
+        if: matrix.target == 'windows-arm64'
+        shell: pwsh
+        run: |
+          pyinstaller --noconfirm --clean --onefile --windowed --name Phantom-Sec --collect-all rich --collect-all dns packaging/appimage_entry.py
+          Compress-Archive -Path dist/Phantom-Sec.exe -DestinationPath Phantom-Sec-Windows-arm64.zip
+      - name: Build macOS application
+        if: startsWith(matrix.target, 'macos-')
+        shell: bash
+        run: |
+          pyinstaller --noconfirm --clean --windowed --name "Phantom Sec" --collect-all rich --collect-all dns packaging/appimage_entry.py
+          ditto -c -k --sequesterRsrc --keepParent "dist/Phantom Sec.app" "Phantom-Sec-${{ matrix.target }}.zip"
+      - name: Upload platform package
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.target }}
+          path: Phantom-Sec-*
+          if-no-files-found: error
+          retention-days: 7
+  publish:
+    name: Publish permanent GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all platform packages
+        uses: actions/download-artifact@v4
+        with:
+          pattern: release-*
+          path: release-assets
+          merge-multiple: true
+      - name: Generate SHA-256 checksums
+        shell: bash
+        run: |
+          cd release-assets
+          find . -maxdepth 1 -type f ! -name SHA256SUMS.txt -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+      - name: Publish permanent release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          prerelease: true
+          files: release-assets/*
