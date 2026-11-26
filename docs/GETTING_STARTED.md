@@ -63,7 +63,7 @@ You can also list the tools without opening the menu:
 phantom-sec list
 ```
 
-## 6. Try a safe first command
+## 7. Try a safe first command
 
 For example, show basic information about your computer:
 

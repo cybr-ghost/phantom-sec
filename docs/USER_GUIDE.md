@@ -2,7 +2,7 @@
 
 This guide explains how to use the tools that are included in Phantom Sec today.
 
-## First: how commands work
+## First: check your setup\n\nRun `phantom-sec doctor` to check that Python, the tool catalogue, and the local history folder are ready.\n\n## First: how commands work
 
 A command starts with `phantom-sec`. The word after it tells the app what you want to do.
 
@@ -12,7 +12,7 @@ For example:
 phantom-sec list
 ```
 
-This displays the built-in tool list.
+This displays the built-in tool list. The interactive menu also stays open after each tool, so you can run several checks before typing `q` to quit.
 
 To run one tool, use `run` followed by its ID:
 

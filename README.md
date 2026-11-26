@@ -10,8 +10,8 @@ You do not need to know everything about cybersecurity to explore this project.
 
 1. Read the [Getting Started guide](docs/GETTING_STARTED.md).
 2. Follow the installation steps.
-3. Open the app by running `phantom-sec`.
-4. Choose a tool from the list, or read the [Beginner's User Guide](docs/USER_GUIDE.md).
+3. Check your setup with `phantom-sec doctor`.\n4. Open the app by running `phantom-sec`.
+5. Choose tools from the menu, which stays open until you quit, or read the [Beginner's User Guide](docs/USER_GUIDE.md).
 
 If a command or word is unfamiliar, check the [Glossary](docs/GLOSSARY.md).
 
