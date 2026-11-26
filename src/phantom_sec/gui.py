@@ -155,38 +155,39 @@ class PhantomSecWindow:
         self.current_view = "catalogue"
         self.selected_module = None
         self._clear_body()
-        self.body.columnconfigure(0, weight=1)
-        self.body.rowconfigure(3, weight=1)
+        self.body.columnconfigure(0, weight=0, minsize=410)
+        self.body.columnconfigure(1, weight=1)
+        self.body.rowconfigure(0, weight=1)
 
-        banner = ttk.Frame(self.body)
-        banner.grid(row=0, column=0, sticky="ew", pady=(0, 12))
-        ttk.Label(banner, text="PHANTOM SEC", font=("Cascadia Mono", 18, "bold"),
-                  foreground=WHITE).pack(anchor="center")
-        ttk.Label(banner, text="SELECT AN OPERATION MODULE",
-                  style="Muted.TLabel").pack(anchor="center", pady=(3, 0))
+        catalogue = ttk.Frame(self.body)
+        catalogue.grid(row=0, column=0, sticky="nsew", padx=(0, 28))
+        catalogue.columnconfigure(0, weight=1)
+        catalogue.rowconfigure(3, weight=1)
 
-        search_row = ttk.Frame(self.body)
+        ttk.Label(catalogue, text="SELECT AN OPERATION MODULE",
+                  style="Muted.TLabel").grid(row=0, column=0, sticky="w", pady=(2, 10))
+        search_row = ttk.Frame(catalogue)
         search_row.grid(row=1, column=0, sticky="ew", pady=(0, 7))
         search_row.columnconfigure(1, weight=1)
-        ttk.Label(search_row, text="SEARCH  >", style="Muted.TLabel").grid(
-            row=0, column=0, padx=(0, 10))
+        ttk.Label(search_row, text="SEARCH >", style="Muted.TLabel").grid(
+            row=0, column=0, padx=(0, 8))
         self.search_entry = ttk.Entry(search_row, textvariable=self.search_value)
         self.search_entry.grid(row=0, column=1, sticky="ew")
         self.search_entry.configure(takefocus=True)
         self.search_value.trace_add("write", lambda *_: self._refresh_catalogue())
-        ttk.Button(search_row, text="★ FAVOURITES",
-                   command=lambda: self._set_filter("FAVOURITES")).grid(
-                       row=0, column=2, padx=(8, 0))
-        ttk.Button(search_row, text="RECENT",
-                   command=lambda: self._set_filter("RECENT")).grid(
-                       row=0, column=3, padx=(6, 0))
-        ttk.Button(search_row, text="ALL",
-                   command=lambda: self._set_filter("ALL TOOLS")).grid(
-                       row=0, column=4, padx=(6, 0))
 
-        ttk.Label(self.body, textvariable=self.filter_value,
-                  style="Muted.TLabel").grid(row=2, column=0, sticky="w", pady=(2, 6))
-        list_frame = ttk.Frame(self.body)
+        filters = ttk.Frame(catalogue)
+        filters.grid(row=2, column=0, sticky="ew", pady=(0, 8))
+        ttk.Button(filters, text="★ FAVOURITES",
+                   command=lambda: self._set_filter("FAVOURITES")).pack(side="left")
+        ttk.Button(filters, text="RECENT",
+                   command=lambda: self._set_filter("RECENT")).pack(side="left", padx=(6, 0))
+        ttk.Button(filters, text="ALL",
+                   command=lambda: self._set_filter("ALL TOOLS")).pack(side="left", padx=(6, 0))
+        ttk.Label(filters, textvariable=self.filter_value,
+                  style="Muted.TLabel").pack(side="right")
+
+        list_frame = ttk.Frame(catalogue)
         list_frame.grid(row=3, column=0, sticky="nsew")
         list_frame.columnconfigure(0, weight=1)
         list_frame.rowconfigure(0, weight=1)
@@ -203,8 +204,35 @@ class PhantomSecWindow:
         self.tool_list.bind("<Double-Button-1>", self._open_selected)
         self.tool_list.bind("<Return>", self._open_selected)
         self.tool_list.bind("<<ListboxSelect>>", self._catalogue_selection)
-        ttk.Label(self.body, text="DOUBLE-CLICK OR PRESS ENTER TO OPEN A TOOL",
+        ttk.Label(catalogue, text="DOUBLE-CLICK OR PRESS ENTER TO OPEN",
                   style="Muted.TLabel").grid(row=4, column=0, sticky="w", pady=(8, 0))
+
+        stage = ttk.Frame(self.body)
+        stage.grid(row=0, column=1, sticky="nsew")
+        stage.columnconfigure(0, weight=1)
+        stage.rowconfigure(0, weight=1)
+        artwork = ttk.Frame(stage)
+        artwork.grid(row=0, column=0, sticky="nsew")
+        artwork.columnconfigure(0, weight=1)
+        artwork.rowconfigure(0, weight=1)
+        mark = (
+            "       .--------.       \n"
+            "      /  .----.  \\      \n"
+            "     /  /      \\  \\     \n"
+            "    |  |  ____  |  |    \n"
+            "    |  | |    | |  |    \n"
+            "    |  | |____| |  |    \n"
+            "     \\  \\      /  /     \n"
+            "      \\  '----'  /      \n"
+            "       '--------'       "
+        )
+        ttk.Label(artwork, text=mark, font=("Cascadia Mono", 18),
+                  foreground="#b8b8b8", justify="center").grid(
+                      row=0, column=0, sticky="s", pady=(0, 16))
+        ttk.Label(artwork, text="SECURITY  ·  PRIVACY  ·  DIAGNOSTICS",
+                  style="Muted.TLabel").grid(row=1, column=0, sticky="n", pady=(0, 12))
+        ttk.Label(stage, text="READY FOR LOCAL OPERATIONS",
+                  style="Muted.TLabel").grid(row=1, column=0, sticky="e", pady=(8, 2))
         self._refresh_catalogue()
         self.search_entry.focus_set()
 
