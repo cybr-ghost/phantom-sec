@@ -1,50 +1,71 @@
 # Phantom Sec
 
-A modular, open-source toolkit for defensive security, responsible OSINT, network diagnostics, and system administration.
+**Phantom Sec** is an open-source project for learning about defensive security, responsible OSINT, network basics, and looking after your own computer.
 
-> **Developer preview: 0.1.0.** This repository contains a Python CLI, read-only local utilities, basic DNS diagnostics, a metadata-only Module Workshop, SQLite history, and report exports. It is not a finished security suite.
+> **Current version: 0.1.0 (early preview).** Phantom Sec is still being built. It currently has a small command-line app and 12 built-in tools. It is not a complete security suite.
 
-## Included
-- Rich terminal catalogue and interactive single-module prompt
-- System information, memory counters, process count, disk usage, and hostname
-- File SHA-256 hashing, metadata, and directory size analysis
-- Local network interface names, forward DNS, and reverse DNS
-- SQLite run history and settings storage
-- JSON and CSV history exports
-- Module manifest template generation and validation
-- pytest tests and GitHub Actions workflow
+## New here? Start here
 
-## Quick start
+You do not need to know everything about cybersecurity to explore this project.
+
+1. Read the [Getting Started guide](docs/GETTING_STARTED.md).
+2. Follow the installation steps.
+3. Open the app by running `phantom-sec`.
+4. Choose a tool from the list, or read the [Beginner's User Guide](docs/USER_GUIDE.md).
+
+If a command or word is unfamiliar, check the [Glossary](docs/GLOSSARY.md).
+
+## What can it do today?
+
+- Show basic information about your computer.
+- Show memory and disk usage.
+- Count running processes without collecting their command lines.
+- Calculate a file's SHA-256 hash and show basic file details.
+- Show local network interface names.
+- Look up DNS information for a hostname or IP address.
+- Save a local history of tool runs.
+- Export that history as JSON or CSV.
+
+## Install it
+
+You need Python 3.10 or newer. Linux is the first development platform.
+
 ```bash
 git clone https://github.com/cybr-ghost/phantom-sec.git
 cd phantom-sec
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install -e ".[dev]"
+python -m pip install -e .
 phantom-sec
-``
+```
 
-See [Installation](docs/INSTALLATION.md) and [Usage](docs/USAGE.md).
+For development and tests, install the extra tools with `python -m pip install -e ".[dev]"`.
 
-## Documentation
-- [Project overview](docs/PROJECT_OVERVIEW.md)
-- [Architecture](docs/ARCHITECTURE.md)
-- [Tool catalogue](docs/TOOL_CATALOGUE.md)
-- [Module specification](docs/MODULE_SPECIFICATION.md)
-- [Roadmap](docs/ROADMAP.md)
-- [Usage](docs/USAGE.md)
-- [Contributing](CONTRIBUTING.md)
+## Project guides
+
+- [Getting Started](docs/GETTING_STARTED.md)
+- [Beginner's User Guide](docs/USER_GUIDE.md)
+- [Tools available today](docs/TOOLS_TODAY.md)
+- [Project overview](docs/PROJECT_GUIDE.md)
+- [How the project works](docs/HOW_IT_WORKS.md)
+- [Module guide](docs/MODULE_GUIDE.md)
+- [Development plan](docs/WHAT_WE_ARE_BUILDING.md)
+- [Glossary](docs/GLOSSARY.md)
+- [How to contribute](CONTRIBUTING.md)
 - [Security policy](SECURITY.md)
 
 ## Safety
-Phantom Sec is intended for education, defensive security, system administration, and explicitly authorized testing. Current network tools perform basic DNS and local interface inspection only. No port scanning, exploitation, credential collection, stealth feature, or third-party plugin execution is included.
 
-## Development
+Use Phantom Sec only on your own devices and networks, or where you have clear permission. Current network tools are basic DNS lookups and local interface information. The project does not include exploitation, password collection, stealth features, or automatic execution of third-party modules.
+
+## Development checks
+
 ```bash
 python -m pip install -e ".[dev]"
 pytest
 ruff check .
-``
+```
 
 ## License
+
 GNU GPL-3.0-only. See [LICENSE](LICENSE).
