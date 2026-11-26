@@ -137,3 +137,119 @@ def certificate_transparency_search(domain: str | None = None, **_: object) -> d
         "source": "crt.sh (public Certificate Transparency logs)",
         "note": "Certificate issuance records are public transparency data. A listed certificate does not prove that a hostname is currently active or trustworthy.",
     }
+
+
+
+def _assess_spf(records: list[str]) -> dict[str, object]:
+    """Summarise SPF TXT record count and its terminal all mechanism."""
+    if not records:
+        return {"status": "missing", "record_count": 0, "all_mechanism": None,
+                "assessment": "No SPF record was found."}
+    if len(records) != 1:
+        return {"status": "multiple", "record_count": len(records), "all_mechanism": None,
+                "assessment": "Multiple SPF records were found; publish one SPF record per domain."}
+    mechanisms = [part.lower() for part in records[0].split()]
+    terminal = next((part for part in reversed(mechanisms)
+                     if part in {"-all", "~all", "?all", "+all", "all"}), None)
+    descriptions = {
+        "-all": "The record ends with a hard-fail policy.",
+        "~all": "The record ends with a soft-fail policy.",
+        "?all": "The record ends with a neutral policy.",
+        "+all": "The record explicitly permits all senders and is overly permissive.",
+        "all": "The record uses an unqualified all mechanism.",
+    }
+    return {
+        "status": "configured",
+        "record_count": 1,
+        "all_mechanism": terminal,
+        "assessment": descriptions.get(terminal, "No terminal all mechanism was found."),
+    }
+
+
+def _assess_dmarc(records: list[str]) -> dict[str, object]:
+    """Summarise DMARC policy without exposing reporting mailbox addresses."""
+    if not records:
+        return {"status": "missing", "record_count": 0, "policy": None,
+                "assessment": "No DMARC record was found."}
+    if len(records) != 1:
+        return {"status": "multiple", "record_count": len(records), "policy": None,
+                "assessment": "Multiple DMARC records were found; publish one DMARC record."}
+    tags = {}
+    for part in records[0].split(";"):
+        if "=" in part:
+            key, value = part.split("=", 1)
+            tags[key.strip().lower()] = value.strip().lower()
+    policy = tags.get("p")
+    descriptions = {
+        "none": "Monitoring policy only; messages are not requested to be quarantined or rejected.",
+        "quarantine": "The policy requests suspicious messages to be quarantined.",
+        "reject": "The policy requests failing messages to be rejected.",
+    }
+    if tags.get("v") != "dmarc1" or policy not in descriptions:
+        return {"status": "invalid", "record_count": 1, "policy": policy,
+                "assessment": "The DMARC record is missing a valid version or policy tag."}
+    return {"status": "configured", "record_count": 1, "policy": policy,
+            "assessment": descriptions[policy]}
+
+
+def email_domain_posture(domain: str | None = None, **_: object) -> dict[str, object]:
+    """Check public MX, SPF, and DMARC DNS configuration for an email domain."""
+    name = _normalise_domain(domain)
+    resolver = dns.resolver.Resolver()
+    resolver.timeout = 3
+    resolver.lifetime = 5
+
+    def query_txt(owner: str) -> list[str]:
+        try:
+            answer = resolver.resolve(owner, "TXT", raise_on_no_answer=False)
+            if not answer.rrset:
+                return []
+            values = []
+            for item in answer:
+                parts = getattr(item, "strings", ())
+                if parts:
+                    values.append(b"".join(parts).decode("utf-8", "replace"))
+                else:
+                    values.append(item.to_text().strip('"'))
+            return values
+        except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer,
+                dns.resolver.NoNameservers, dns.exception.Timeout):
+            return []
+
+    try:
+        mx_answer = resolver.resolve(name, "MX", raise_on_no_answer=False)
+        mx_records = [item.to_text() for item in mx_answer] if mx_answer.rrset else []
+    except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer,
+            dns.resolver.NoNameservers, dns.exception.Timeout):
+        mx_records = []
+
+    txt_records = query_txt(name)
+    dmarc_records = query_txt(f"_dmarc.{name}")
+    spf = _assess_spf([record for record in txt_records
+                       if record.strip().lower().startswith("v=spf1")])
+    dmarc = _assess_dmarc([record for record in dmarc_records
+                           if record.strip().lower().startswith("v=dmarc1")])
+    recommendations = []
+    if spf["status"] == "missing":
+        recommendations.append("Add an SPF record if this domain sends email.")
+    elif spf["status"] == "multiple":
+        recommendations.append("Combine SPF rules into a single SPF record.")
+    elif spf["all_mechanism"] in {"+all", "all", "?all"}:
+        recommendations.append("Review the SPF all mechanism; the current policy is permissive or neutral.")
+    if dmarc["status"] == "missing":
+        recommendations.append("Add a DMARC record and begin with a policy appropriate to your mail setup.")
+    elif dmarc["status"] in {"multiple", "invalid"}:
+        recommendations.append("Correct the DMARC record so there is exactly one valid policy.")
+    elif dmarc["policy"] == "none":
+        recommendations.append("Review DMARC reports before considering a stricter enforcement policy.")
+    if not mx_records:
+        recommendations.append("No MX record was found; confirm whether this domain is intended to receive email.")
+    return {
+        "domain": name,
+        "mx_records": mx_records,
+        "spf": spf,
+        "dmarc": dmarc,
+        "recommendations": recommendations,
+        "source": "Public DNS records",
+        "note": "This is a DNS configuration snapshot, not a mail-delivery test or a guarantee against spoofing. DNS answers may be cached or delayed.",
+    }
