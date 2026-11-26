@@ -10,7 +10,8 @@ You do not need to know everything about cybersecurity to explore this project.
 
 1. Read the [Getting Started guide](docs/GETTING_STARTED.md).
 2. Follow the installation steps.
-3. Check your setup with `phantom-sec doctor`.\n4. Open the app by running `phantom-sec`.
+3. Check your setup with `phantom-sec doctor`.
+4. Open the app by running `phantom-sec`.
 5. Choose tools from the menu, which stays open until you quit, or read the [Beginner's User Guide](docs/USER_GUIDE.md).
 
 If a command or word is unfamiliar, check the [Glossary](docs/GLOSSARY.md).
@@ -25,6 +26,7 @@ If a command or word is unfamiliar, check the [Glossary](docs/GLOSSARY.md).
 - Look up DNS information for a hostname or IP address.
 - Save a local history of tool runs.
 - Export that history as JSON or CSV.
+- Save and view simple local preferences.
 
 ## Install it
 
@@ -36,6 +38,7 @@ cd phantom-sec
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install -e .
+phantom-sec doctor
 phantom-sec
 ```
 
