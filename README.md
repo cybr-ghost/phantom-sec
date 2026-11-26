@@ -1,6 +1,6 @@
 # Phantom Sec
 
-> **[⬇️ DOWNLOAD PHANTOM SEC](DOWNLOADS.md)** · Choose Linux or Windows and follow the simple download steps.
+**[🔵 DOWNLOAD PHANTOM SEC](DOWNLOADS.md)** · Choose your computer and follow the graphical installation steps.
 
 **Phantom Sec** is a free, open-source desktop toolkit for defensive security, responsible OSINT, network diagnostics, and system administration. It is licensed under the **GNU General Public License v3.0 (GPL-3.0-only)**. You can inspect, build, modify, and redistribute the source under the terms of that license.
 
@@ -8,11 +8,10 @@
 
 ## New here? Start here
 
-1. Read the [Getting started guide](docs/getting-started.md).
-2. Follow the installation steps.
-3. Check your setup with `phantom-sec doctor`.
-4. Open the desktop app with `phantom-sec gui`.
-5. Read the [Beginner's user guide](docs/user-guide.md).
+1. Open the **[Downloads page](DOWNLOADS.md)**.
+2. Choose the package for your operating system and processor.
+3. Follow the graphical installation steps. The normal user installation does not require the terminal on supported desktop environments.
+4. Read the [Beginner's user guide](docs/user-guide.md).
 
 If a command or word is unfamiliar, check the [Beginner's glossary](docs/glossary.md).
 
@@ -34,34 +33,13 @@ If a command or word is unfamiliar, check the [Beginner's glossary](docs/glossar
 
 ## Downloads
 
-For permanent, versioned packages, use the **[GitHub Releases page](https://github.com/cybr-ghost/phantom-sec/releases)**. For platform details and installation help, open the **[Phantom Sec Downloads guide](DOWNLOADS.md)**. Published releases include SHA-256 checksums.
+**[🔵 Open the official Phantom Sec Downloads page](DOWNLOADS.md)**
 
-## Install it
+Published, permanent versioned packages will appear on the [GitHub Releases page](https://github.com/cybr-ghost/phantom-sec/releases). Only use packages attached to an actual release. See the downloads guide for supported systems, installation steps, and release status.
 
-Use the **[Downloads page](DOWNLOADS.md)** for the direct links and step-by-step instructions. Versioned downloads will also appear on the [Releases page](https://github.com/cybr-ghost/phantom-sec/releases).
+## Developer installation
 
-### Linux (x86_64)
-
-1. Download `Phantom-Sec-x86_64.AppImage` from the **Build Linux AppImage** workflow artifact.
-2. Open a terminal in the download folder.
-3. Run:
-
-```bash
-chmod +x Phantom-Sec-x86_64.AppImage
-./Phantom-Sec-x86_64.AppImage
-```
-
-The AppImage contains the app runtime and Python dependencies. If it reports a FUSE error on Arch Linux, install compatibility support with `sudo pacman -S fuse2`, or run it with `./Phantom-Sec-x86_64.AppImage --appimage-extract-and-run`.
-
-### Windows 10/11 (x64)
-
-1. Download `Phantom-Sec-Setup-x64.exe` for a normal installation, or `Phantom-Sec-Windows-x64.zip` for the portable version, from the **Build Windows** workflow artifact.
-2. For the installer, open the EXE and follow the setup steps. For the portable version, extract the ZIP and open `Phantom-Sec.exe`.
-3. Launch **Phantom Sec** from the Start menu or desktop shortcut (installer), or from the extracted folder (portable).
-
-Windows may show a SmartScreen warning because early project builds are not code-signed. Only download builds from this official repository and inspect the release notes/checksums before running them.
-
-### Developer installation (Linux or Windows)
+This section is for people who want to work on the source code. Regular users should use the graphical packages on the [Downloads page](DOWNLOADS.md).
 
 Python 3.10 or newer is required. Clone the project and install it in a virtual environment:
 
@@ -81,17 +59,11 @@ For development and tests, install the extra tools with `python -m pip install -
 
 ## Desktop interface
 
-Launch the graphical desktop app with `phantom-sec gui`. It includes live search across tool names, IDs and descriptions, category filters, contextual input fields, background execution, copyable JSON output, and local run history. The interface uses Python's built-in Tk toolkit and does not add a large GUI dependency.
+The desktop app includes live search across tool names, IDs and descriptions, category filters, contextual input fields, background execution, copyable JSON output, and local run history. The interface uses Python's built-in Tk toolkit and does not add a large GUI dependency.
 
 ## Create a system report
 
-Run:
-
-```bash
-phantom-sec report
-```
-
-This creates `phantom-sec-report.json` in the current folder. Choose another location with `--output`. The report contains local device information, so review it before sharing.
+Run `phantom-sec report` to create a timestamped JSON overview. Choose another location with `--output`. The report contains local device information, so review it before sharing.
 
 ## Project guides
 
@@ -121,7 +93,7 @@ Use Phantom Sec only on your own devices and networks, or where you have clear p
 | macOS | Intel x86_64 | App bundle ZIP |
 | macOS | Apple Silicon ARM64 | App bundle ZIP |
 
-32-bit systems and mobile operating systems are not currently supported. These are automated release targets, not a claim that every build has already been tested on physical hardware. A platform should be considered available only when its package is attached to a successful release.
+32-bit systems and mobile operating systems are not supported. These are automated release targets, not a claim that every build has already been tested on physical hardware. A platform should be considered available only when its package is attached to a successful release.
 
 ## Development checks
 
