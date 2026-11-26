@@ -3,7 +3,11 @@
 from __future__ import annotations
 
 import hashlib
-from pathlib import Path
+import math
+import stat
+import tarfile
+import zipfile
+from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any
 
 
@@ -136,4 +140,134 @@ def find_duplicate_files(path: str | None = None, **_: Any) -> dict[str, Any]:
         "skipped_files": skipped,
         "scan_limit_reached": truncated,
         "note": "Read-only scan. Symbolic links are ignored; no files are deleted or changed.",
+    }
+
+
+
+def _unsafe_archive_path(name: str) -> bool:
+    """Return whether an archive member name attempts to escape its extraction root."""
+    posix_name = PurePosixPath(name.replace("\\", "/"))
+    windows_name = PureWindowsPath(name)
+    return (
+        posix_name.is_absolute()
+        or windows_name.is_absolute()
+        or bool(windows_name.drive)
+        or ".." in posix_name.parts
+    )
+
+
+def inspect_archive(path: str | None = None, **_: Any) -> dict[str, Any]:
+    """List ZIP or TAR archive metadata without extracting or executing any member."""
+    if not path:
+        raise ValueError("Provide --path to a ZIP or TAR archive.")
+    target = Path(path).expanduser()
+    if target.is_symlink() or not target.is_file():
+        raise ValueError("Provide a regular archive file, not a folder or symbolic link.")
+    maximum_bytes = 100 * 1024 * 1024
+    maximum_entries = 2000
+    try:
+        archive_size = target.stat().st_size
+        if archive_size > maximum_bytes:
+            raise ValueError("Archive is larger than the 100 MiB inspection limit.")
+        entries: list[dict[str, Any]] = []
+        total_entries = 0
+        archive_format = ""
+        if zipfile.is_zipfile(target):
+            archive_format = "ZIP"
+            with zipfile.ZipFile(target) as archive:
+                infos = archive.infolist()
+                total_entries = len(infos)
+                for info in infos[:maximum_entries]:
+                    mode = (info.external_attr >> 16) & 0xFFFF
+                    is_link = stat.S_ISLNK(mode)
+                    entries.append({
+                        "name": info.filename[:500],
+                        "type": "directory" if info.is_dir() else ("symbolic link" if is_link else "file"),
+                        "size_bytes": info.file_size,
+                        "compressed_size_bytes": info.compress_size,
+                        "encrypted": bool(info.flag_bits & 0x1),
+                        "unsafe_path": _unsafe_archive_path(info.filename),
+                        "symbolic_link": is_link,
+                    })
+        else:
+            try:
+                with tarfile.open(target, mode="r:*") as archive:
+                    archive_format = "TAR"
+                    for member in archive:
+                        total_entries += 1
+                        if total_entries > maximum_entries:
+                            break
+                        kind = (
+                            "directory" if member.isdir()
+                            else "symbolic link" if member.issym()
+                            else "hard link" if member.islnk()
+                            else "file" if member.isfile()
+                            else "special"
+                        )
+                        entries.append({
+                            "name": member.name[:500],
+                            "type": kind,
+                            "size_bytes": member.size,
+                            "compressed_size_bytes": None,
+                            "encrypted": False,
+                            "unsafe_path": _unsafe_archive_path(member.name),
+                            "symbolic_link": member.issym() or member.islnk(),
+                        })
+            except (tarfile.ReadError, tarfile.CompressionError, EOFError):
+                raise ValueError("The file is not a supported ZIP or TAR archive.") from None
+    except (OSError, zipfile.BadZipFile, zipfile.LargeZipFile) as exc:
+        raise ValueError(f"Could not inspect the archive: {exc}") from exc
+    return {
+        "path": str(target.resolve()),
+        "archive_format": archive_format,
+        "archive_size_bytes": archive_size,
+        "entries_found": total_entries,
+        "entries_returned": len(entries),
+        "truncated": total_entries > maximum_entries,
+        "unsafe_path_entries": sum(1 for entry in entries if entry["unsafe_path"]),
+        "entries": entries,
+        "note": "Metadata-only inspection. No files were extracted, executed, or modified. Review unsafe paths before extracting archives.",
+    }
+
+
+def file_entropy_profile(path: str | None = None, **_: Any) -> dict[str, Any]:
+    """Calculate whole-file Shannon entropy without returning file contents."""
+    if not path:
+        raise ValueError("Provide --path to a regular file.")
+    target = Path(path).expanduser()
+    if target.is_symlink() or not target.is_file():
+        raise ValueError("Provide a regular file, not a folder or symbolic link.")
+    maximum_bytes = 50 * 1024 * 1024
+    try:
+        size = target.stat().st_size
+        if size > maximum_bytes:
+            raise ValueError("File is larger than the 50 MiB entropy-inspection limit.")
+        frequencies = [0] * 256
+        sampled = 0
+        with target.open("rb") as stream:
+            while chunk := stream.read(1024 * 1024):
+                sampled += len(chunk)
+                for value in chunk:
+                    frequencies[value] += 1
+    except OSError as exc:
+        raise ValueError(f"Could not read the file: {exc}") from exc
+    entropy = 0.0
+    if sampled:
+        entropy = -sum(
+            (count / sampled) * math.log2(count / sampled)
+            for count in frequencies if count
+        )
+    if entropy < 4.0:
+        interpretation = "low byte diversity"
+    elif entropy < 7.0:
+        interpretation = "moderate byte diversity"
+    else:
+        interpretation = "high byte diversity"
+    return {
+        "path": str(target.resolve()),
+        "size_bytes": size,
+        "bytes_sampled": sampled,
+        "shannon_entropy_bits_per_byte": round(entropy, 4),
+        "interpretation": interpretation,
+        "note": "Entropy is a statistical property, not a malware verdict. Compression, encryption, and many legitimate file formats can all produce high entropy.",
     }
