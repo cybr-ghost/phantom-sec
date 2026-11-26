@@ -25,5 +25,9 @@ jobs:
         uses: github/codeql-action/init@v3
         with:
           languages: python
+      # Code scanning is not enabled for this private repository yet.
+      # Run analysis locally in the workflow without attempting a SARIF upload.
       - name: Perform CodeQL analysis
         uses: github/codeql-action/analyze@v3
+        with:
+          upload: false
