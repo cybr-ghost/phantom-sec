@@ -415,9 +415,14 @@ def launch_gui() -> int:
         raise RuntimeError(
             "The desktop interface needs Tk support. Install your Python distribution's Tk package."
         ) from exc
-    root = tk.Tk()
-    PhantomSecWindow(root)
-    root.mainloop()
+    try:
+        root = tk.Tk()
+        PhantomSecWindow(root)
+        root.mainloop()
+    except tk.TclError as exc:
+        raise RuntimeError(
+            "The desktop window could not start. Check that a graphical desktop session is available."
+        ) from exc
     return 0
 
 

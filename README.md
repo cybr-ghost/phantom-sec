@@ -2,7 +2,7 @@
 
 **Phantom Sec** is an open-source project for learning about defensive security, responsible OSINT, network basics, and looking after your own computer.
 
-> **Current version: 0.1.0 (early preview).** Phantom Sec is still being built. It currently has a small command-line app and 16 built-in tools. It is not a complete security suite.
+> **Current version: 0.1.0 (early preview).** Phantom Sec is still being built. It currently has a small command-line app and 17 built-in tools. It is not a complete security suite.
 
 ## New here? Start here
 
@@ -10,7 +10,7 @@
 2. Follow the installation steps.
 3. Check your setup with `phantom-sec doctor`.
 4. Open the app by running `phantom-sec`.
-5. Open the desktop app with `phantom-sec` or `phantom-sec gui`, or read the [Beginner's User Guide](docs/USER_GUIDE.md).
+5. Open the desktop app with `phantom-sec`, or read the [Beginner's User Guide](docs/USER_GUIDE.md).
 
 If a command or word is unfamiliar, check the [Glossary](docs/GLOSSARY.md).
 
@@ -18,7 +18,7 @@ If a command or word is unfamiliar, check the [Glossary](docs/GLOSSARY.md).
 
 - Show basic information about your computer, including uptime and battery status where supported.
 - Create a read-only local system overview with memory, storage, process count, network interface and basic firewall status information.
-- Check UFW and firewalld status on Linux without changing firewall settings.
+- Check UFW/firewalld on Linux or Windows Defender Firewall profiles without changing firewall settings.
 - Save a timestamped JSON report of your local system overview.
 - Calculate a file's SHA-256 hash, inspect file details, and check permission bits.
 - Look up DNS information for a hostname or IP address.
@@ -37,7 +37,7 @@ python -m venv .venv
 source .venv/bin/activate
 python -m pip install -e .
 phantom-sec doctor
-phantom-sec gui gui
+phantom-sec gui
 ```
 
 For development and tests, install the extra tools with `python -m pip install -e ".[dev]"`.

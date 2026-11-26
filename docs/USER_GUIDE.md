@@ -8,7 +8,7 @@ Run `phantom-sec doctor` to check that Python, the tool catalogue, and the local
 
 ## Use the desktop app
 
-Run `phantom-sec gui` to open the graphical interface. The **Tool library** tab includes a search field that filters by tool name, ID, description, or category as you type. Select a tool to see its description and any required input, then choose **Run tool**. Results appear in the output panel. You can copy results, clear the panel, and review previous runs in **Run history**. Press `Ctrl+K` to focus the search field.
+Run `phantom-sec` or `phantom-sec gui` to open the graphical interface. The **Tool library** tab includes a search field that filters by tool name, ID, description, or category as you type. Select a tool to see its description and any required input, then choose **Run tool**. Results appear in the output panel. You can copy results, clear the panel, and review previous runs in **Run history**. Press `Ctrl+K` to focus the search field.
 
 The GUI runs checks in the background so the window remains responsive. The interface uses Tk, included with many Python installations. Some Linux distributions package Tk separately.
 
@@ -20,7 +20,7 @@ Run:
 phantom-sec list
 ```
 
-To open the interactive menu, run `phantom-sec`. It stays open after each tool. Type `q` when you want to quit.
+To open the terminal menu, run `phantom-sec menu`. It stays open after each tool. Type `q` when you want to quit.
 
 ## Your first system overview
 
@@ -32,7 +32,7 @@ phantom-sec run system.overview
 
 It collects basic local information about the operating system, uptime, memory, storage, process count, network interface names, and basic firewall status.
 
-The firewall part checks for UFW and firewalld on Linux. It only reads their status. If neither is detected, that does not prove no firewall is active. Other firewall systems may be in use.
+The firewall part checks UFW/firewalld on Linux or Windows Defender Firewall profiles on Windows. It only reads their status. If a check cannot confirm the status, the tool reports that limitation rather than guessing.
 
 This is an informational snapshot, not a complete security audit. It does not scan other devices or change your computer.
 
@@ -44,7 +44,7 @@ Run:
 phantom-sec run system.firewall
 ```
 
-This checks UFW and firewalld status on Linux. It does not enable, disable, or edit firewall rules, and it does not use administrator privileges. A result of `unknown` means the status could not be confirmed.
+This checks UFW/firewalld on Linux or Windows Defender Firewall profiles on Windows. It does not enable, disable, or edit firewall rules. A result of `unknown` means the status could not be confirmed.
 
 ## Save a system report
 
@@ -67,7 +67,7 @@ The report includes the date and time it was created. It contains information ab
 | Command | What it does |
 |---|---|
 | `phantom-sec run system.info` | Shows basic operating system and Python information. |
-| `phantom-sec run system.uptime` | Shows how long a Linux computer has been running. |
+| `phantom-sec run system.uptime` | Shows uptime on Linux and Windows. |
 | `phantom-sec run system.memory` | Shows memory information where supported. |
 | `phantom-sec run system.battery` | Shows battery charge and status where available. |
 | `phantom-sec run system.process-count` | Counts running processes without collecting command lines. |
@@ -84,7 +84,7 @@ Replace the example path with a file or folder on your computer.
 | `phantom-sec run file.sha256 --path ./README.md` | Calculates a SHA-256 fingerprint of a file. |
 | `phantom-sec run file.metadata --path ./README.md` | Shows basic file information. |
 | `phantom-sec run file.directory-size --path ./docs` | Calculates the total size of a folder. |
-| `phantom-sec run file.permissions --path ./README.md` | Shows permission bits without changing them. |
+| `phantom-sec run file.permissions --path ./README.md` | Shows Unix permission bits on Linux, or current-process access checks on Windows. Windows ACLs are not decoded. |
 
 ## Network basics
 
