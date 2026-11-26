@@ -34,7 +34,7 @@ This page lists the tools included in the current Phantom Sec preview. The catal
 | `network.dns` | Looks up a hostname. |
 | `network.reverse-dns` | Looks up a hostname for an IP address when available. |
 
-## Network intelligence and website security\n\n| Tool ID | What it does |\n|---|---|\n| `network.subnet-calculator` | Calculates IPv4 and IPv6 network boundaries locally without sending traffic. |\n| `web.url-analyzer` | Inspects URL structure and basic indicators locally without opening the URL. |\n| `web.tls-inspector` | Connects to the supplied hostname on port 443 and reads its public TLS certificate. |\n| `web.security-headers` | Sends an HTTP HEAD request and checks common browser security headers. |\n\n## Important limits
+## Network intelligence and website security\n\n| Tool ID | What it does |\n|---|---|\n| `network.subnet-calculator` | Calculates IPv4 and IPv6 network boundaries locally without sending traffic. |\n| `web.url-analyzer` | Inspects URL structure and basic indicators locally without opening the URL. |\n| `web.tls-inspector` | Connects to the supplied hostname on port 443 and reads its public TLS certificate. |\n| `web.security-headers` | Sends an HTTP HEAD request and checks common browser security headers. |\n\n## Important limits\n\nDomain intelligence tools contact public DNS or RDAP/Certificate Transparency services. They do not access accounts or private registration records.
 
 The firewall check supports UFW and firewalld on Linux, and reads Windows Defender Firewall profile status on Windows. Windows file permission output is limited to access checks for the current process; Windows ACL details are not decoded. If a check cannot confirm status, it reports that limitation rather than guessing.
 

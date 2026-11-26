@@ -2,7 +2,7 @@
 
 **Phantom Sec** is an open-source project for learning about defensive security, responsible OSINT, network basics, and looking after your own computer.
 
-> **Current version: 0.1.0 (early preview).** Phantom Sec is still being built. It currently has a small command-line app and 21 built-in tools. It is not a complete security suite.
+> **Current version: 0.1.0 (early preview).** Phantom Sec is still being built. It currently has a small command-line app and 24 built-in tools. It is not a complete security suite.
 
 ## New here? Start here
 
@@ -21,7 +21,7 @@ If a command or word is unfamiliar, check the [Glossary](docs/GLOSSARY.md).
 - Check UFW/firewalld on Linux or Windows Defender Firewall profiles without changing firewall settings.
 - Save a timestamped JSON report of your local system overview.
 - Calculate a file's SHA-256 hash, inspect file details, and check permission bits.
-- Look up DNS information for a hostname or IP address.\n- Calculate IPv4 and IPv6 subnet boundaries locally.\n- Inspect URL structure without opening the URL.\n- Inspect public TLS certificates and common HTTP security headers for supplied websites.
+- Look up DNS information for a hostname or IP address.\n- Calculate IPv4 and IPv6 subnet boundaries locally.\n- Inspect URL structure without opening the URL.\n- Inspect public TLS certificates and common HTTP security headers for supplied websites.\n- Inspect common DNS records, public RDAP registration data, and Certificate Transparency entries.
 - Save a local history of tool runs and export it as JSON or CSV.
 - Save and view simple local preferences.
 - Search and run tools from a native desktop interface with a run-history view.

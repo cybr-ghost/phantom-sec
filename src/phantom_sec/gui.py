@@ -86,6 +86,7 @@ class PhantomSecWindow:
         self.root.title(f"Phantom Sec {__version__}")
         self.root.geometry("1180x760")
         self.root.minsize(900, 620)
+        self.root.minsize(900, 620)
         self.root.configure(background="#171b18")
 
     def _build_styles(self) -> None:
@@ -240,6 +241,9 @@ class PhantomSecWindow:
             activestyle="none", font=("Segoe UI", 10), exportselection=False,
         )
         self.tool_list.grid(row=3, column=0, sticky="nsew")
+        list_scroll = ttk.Scrollbar(sidebar, orient="vertical", command=self.tool_list.yview)
+        list_scroll.grid(row=3, column=1, sticky="ns")
+        self.tool_list.configure(yscrollcommand=list_scroll.set)
         self.tool_list.bind("<<ListboxSelect>>", self._on_tool_selected)
         self.tool_list.bind("<Double-Button-1>", lambda _event: self.run_selected())
         self.visible_modules: list[Module] = []
@@ -299,7 +303,7 @@ class PhantomSecWindow:
         output_frame.rowconfigure(0, weight=1)
         output_frame.columnconfigure(0, weight=1)
         self.output = tk.Text(
-            output_frame, height=12, wrap="word", bg="#171b18", fg="#dce6f8",
+            output_frame, height=12, wrap="word", bg="#171b18", fg="#e9e6dc",
             insertbackground="#f2efe5", selectbackground="#465b49", relief="flat",
             padx=12, pady=10, font=("Cascadia Code", 10),
         )
@@ -399,6 +403,7 @@ class PhantomSecWindow:
                 "network": "IP network (CIDR)",
                 "hostname": "Hostname",
                 "url": "HTTP or HTTPS URL",
+                "domain": "Public domain name",
             }[kind])
             self.input_entry.configure(state="normal")
             self.browse_button.configure(state="normal" if kind == "path" else "disabled")
