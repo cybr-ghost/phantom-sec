@@ -1,4 +1,4 @@
-from phantom_sec.cli import build_parser
+from phantom_sec.cli import build_parser, run_doctor
 
 
 def test_default_command_opens_menu():
@@ -13,3 +13,8 @@ def test_run_command_accepts_domain_option():
     args = build_parser().parse_args(["run", "network.dns", "--domain", "example.com"])
     assert args.module_id == "network.dns"
     assert args.domain == "example.com"
+
+
+def test_doctor_passes_with_writable_home(tmp_path, monkeypatch):
+    monkeypatch.setattr("pathlib.Path.home", lambda: tmp_path)
+    assert run_doctor() == 0
