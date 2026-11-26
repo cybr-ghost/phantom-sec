@@ -2,50 +2,39 @@
 
 A checked item means implemented and present in the repository, not merely discussed.
 
-## Phase 1 - Foundation
-- [x] GitHub repository and project documentation
-- [x] Python package structure and CLI entry point
-- [x] Contribution and security guidance
-- [x] Draft module manifest specification
-
-## Phase 2 - Core application
-- [x] Rich terminal catalogue
+## Core application
+- [x] Python package and CLI
+- [x] Rich module catalogue and interactive single-module prompt
 - [x] Built-in module registry
-- [x] Basic command-line module dispatch
-- [ ] Interactive selection menu
-- [ ] SQLite settings and history
-- [ ] Structured logging and configuration
+- [x] SQLite local settings and run history
+- [x] JSON and CSV history exports
 
-## Phase 3 - Module system
+## Module Workshop
 - [x] JSON manifest validation
-- [x] Module metadata template helper
-- [x] Third-party execution disabled by design
+- [x] JSON manifest template generator
+- [x] Third-party code execution disabled
 - [ ] Reviewed package format and dependency policy
 - [ ] Permission prompts for future sensitive modules
 
-## Phase 4 - Initial tool collection
-- [x] Basic system information
-- [x] Disk usage
-- [x] Local hostname
-- [x] SHA-256 file hashing
-- [x] Directory size analysis
-- [x] DNS hostname resolution
-- [ ] Network interface inventory
+## Built-in tools
+- [x] System and runtime information
+- [x] Memory counters where supported
+- [x] Process count without command-line collection
+- [x] Disk usage and hostname
+- [x] File hash, metadata, and directory size
+- [x] Local network interface names
+- [x] Forward and reverse DNS
 - [ ] Firewall status adapters
-- [ ] HTTP/TLS passive diagnostics
-- [ ] Additional safe OSINT and reporting formats
+- [ ] HTTP/TLS diagnostics with safe URL and network-scope controls
+- [ ] Additional responsible public-source research helpers
 
-## Phase 5 - Quality
-- [x] pytest baseline
-- [x] GitHub Actions test workflow
-- [x] Installation and usage documentation
-- [ ] Arch Linux end-to-end test
-- [ ] Windows compatibility testing
-
-## Phase 6 - Expansion
+## Quality and expansion
+- [x] pytest baseline and GitHub Actions
+- [x] Installation, usage, contribution, and security documentation
+- [ ] Run CI and platform tests on supported environments
+- [ ] Windows and macOS support verification
 - [ ] Graphical interface
-- [ ] Reviewed community module repository
-- [ ] Documentation website
-- [ ] Community Discord server
+- [ ] Reviewed community module distribution
+- [ ] Documentation website and community space
 
 Features not checked above are not implemented yet.

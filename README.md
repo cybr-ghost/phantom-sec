@@ -2,16 +2,16 @@
 
 A modular, open-source toolkit for defensive security, responsible OSINT, network diagnostics, and system administration.
 
-> **Status: early developer preview (0.1.0).** The repository now contains a working Python CLI foundation and a small set of read-only built-in utilities. The broader catalogue remains a roadmap, not a claim of completed features.
+> **Developer preview: 0.1.0.** This repository contains a Python CLI, read-only local utilities, basic DNS diagnostics, a metadata-only Module Workshop, SQLite history, and report exports. It is not a finished security suite.
 
-## Features in this preview
-- Rich terminal catalogue and command-line interface
-- Built-in module registry
-- Basic system and disk information
-- Local hostname information
-- SHA-256 file hashing and directory size analysis
-- DNS hostname lookup through the system resolver
-- JSON module-manifest validation (no third-party code execution)
+## Included
+- Rich terminal catalogue and interactive single-module prompt
+- System information, memory counters, process count, disk usage, and hostname
+- File SHA-256 hashing, metadata, and directory size analysis
+- Local network interface names, forward DNS, and reverse DNS
+- SQLite run history and settings storage
+- JSON and CSV history exports
+- Module manifest template generation and validation
 - pytest tests and GitHub Actions workflow
 
 ## Quick start
@@ -20,7 +20,7 @@ git clone https://github.com/cybr-ghost/phantom-sec.git
 cd phantom-sec
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install -e .
+python -m pip install -e ".[dev]"
 phantom-sec
 ``
 
@@ -32,11 +32,12 @@ See [Installation](docs/INSTALLATION.md) and [Usage](docs/USAGE.md).
 - [Tool catalogue](docs/TOOL_CATALOGUE.md)
 - [Module specification](docs/MODULE_SPECIFICATION.md)
 - [Roadmap](docs/ROADMAP.md)
+- [Usage](docs/USAGE.md)
 - [Contributing](CONTRIBUTING.md)
 - [Security policy](SECURITY.md)
 
 ## Safety
-Phantom Sec is intended for education, defensive security, system administration, and explicitly authorized testing. Network testing must be limited to systems you own or are authorized to assess. The current preview contains no port scanner, exploit framework, credential collection, stealth feature, or third-party plugin execution.
+Phantom Sec is intended for education, defensive security, system administration, and explicitly authorized testing. Current network tools perform basic DNS and local interface inspection only. No port scanning, exploitation, credential collection, stealth feature, or third-party plugin execution is included.
 
 ## Development
 ```bash

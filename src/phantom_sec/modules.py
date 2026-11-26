@@ -11,6 +11,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable
 
+from phantom_sec.network_tools import interfaces, reverse_dns
+from phantom_sec.system_tools import environment_summary, memory_info, process_overview
+
 
 @dataclass(frozen=True)
 class Module:
@@ -22,15 +25,9 @@ class Module:
 
 
 def system_info(**_: Any) -> dict[str, Any]:
-    return {
-        "os": platform.platform(),
-        "system": platform.system(),
-        "release": platform.release(),
-        "machine": platform.machine(),
-        "python": platform.python_version(),
-        "cpu_count": os.cpu_count(),
-        "memory_note": "Memory details are not collected by this portable baseline.",
-    }
+    return {"os": platform.platform(), "system": platform.system(), "release": platform.release(),
+            "machine": platform.machine(), "python": platform.python_version(),
+            "cpu_count": os.cpu_count()}
 
 
 def disk_usage(path: str | None = None, **_: Any) -> dict[str, Any]:
@@ -53,14 +50,24 @@ def file_hash(path: str | None = None, **_: Any) -> dict[str, Any]:
     return {"path": str(target.resolve()), "algorithm": "SHA-256", "digest": digest.hexdigest()}
 
 
+def file_metadata(path: str | None = None, **_: Any) -> dict[str, Any]:
+    if not path:
+        raise ValueError("Provide --path to a file.")
+    target = Path(path).expanduser()
+    if not target.is_file():
+        raise ValueError("The supplied path is not a regular file.")
+    stat = target.stat()
+    return {"path": str(target.resolve()), "size_bytes": stat.st_size,
+            "modified_time": stat.st_mtime, "suffix": target.suffix.lower()}
+
+
 def directory_size(path: str | None = None, **_: Any) -> dict[str, Any]:
     if not path:
         raise ValueError("Provide --path to a directory.")
     root = Path(path).expanduser()
     if not root.is_dir():
         raise ValueError("The supplied path is not a directory.")
-    total = 0
-    count = 0
+    total = count = 0
     for item in root.rglob("*"):
         try:
             if item.is_file() and not item.is_symlink():
@@ -73,7 +80,7 @@ def directory_size(path: str | None = None, **_: Any) -> dict[str, Any]:
 
 def dns_lookup(domain: str | None = None, **_: Any) -> dict[str, Any]:
     if not domain:
-        raise ValueError("Provide --domain with a domain you are permitted to research.")
+        raise ValueError("Provide --domain with a hostname.")
     name = domain.strip().rstrip(".")
     if not name or len(name) > 253 or "/" in name or " " in name:
         raise ValueError("Enter a valid hostname, not a URL or path.")
@@ -89,12 +96,18 @@ def local_hostname(**_: Any) -> dict[str, Any]:
 
 
 _MODULES = (
-    Module("system.info", "System information", "System", "Show basic operating-system and runtime information.", system_info),
+    Module("system.info", "System information", "System", "Show basic OS and runtime information.", system_info),
+    Module("system.memory", "Memory overview", "System", "Show available memory counters where supported.", memory_info),
+    Module("system.process-count", "Process count", "System", "Show a process count without reading process arguments.", process_overview),
+    Module("system.environment", "Environment summary", "System", "Show basic local environment information.", environment_summary),
     Module("system.disk", "Disk usage", "System", "Show storage usage for a local path.", disk_usage),
-    Module("file.sha256", "SHA-256 file hash", "File analysis", "Calculate a file hash without modifying the file.", file_hash),
-    Module("file.directory-size", "Directory size", "File analysis", "Calculate the size of regular files in a directory.", directory_size),
-    Module("network.dns", "DNS lookup", "Network diagnostics", "Resolve a hostname using the configured DNS resolver.", dns_lookup),
     Module("system.hostname", "Local hostname", "System", "Show the local machine hostname.", local_hostname),
+    Module("file.sha256", "SHA-256 file hash", "File analysis", "Hash a file without modifying it.", file_hash),
+    Module("file.metadata", "File metadata", "File analysis", "Show basic metadata for a local file.", file_metadata),
+    Module("file.directory-size", "Directory size", "File analysis", "Calculate regular-file sizes in a directory.", directory_size),
+    Module("network.interfaces", "Network interfaces", "Network diagnostics", "List local network interface names.", interfaces),
+    Module("network.dns", "DNS lookup", "Network diagnostics", "Resolve a hostname with the system resolver.", dns_lookup),
+    Module("network.reverse-dns", "Reverse DNS", "Network diagnostics", "Look up the PTR hostname for an IP address.", reverse_dns),
 )
 
 
