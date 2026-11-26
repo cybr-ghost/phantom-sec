@@ -15,8 +15,9 @@ def test_linux_battery_reads_capacity_and_status(tmp_path, monkeypatch):
     original_path = computer_checks.Path
     monkeypatch.setattr(computer_checks.platform, "system", lambda: "Linux")
     monkeypatch.setattr(
-        original_path, "glob",
-        lambda self, pattern: [battery] if str(self) == "/sys/class/power_supply" else [],
+        computer_checks,
+        "Path",
+        lambda value: tmp_path if value == "/sys/class/power_supply" else original_path(value),
     )
     result = battery_info()
     assert result["available"] is True
