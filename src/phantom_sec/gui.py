@@ -74,7 +74,7 @@ def input_kind(module_id: str) -> str | None:
 class PhantomSecWindow:
     """Single-window terminal-style Phantom Sec application."""
 
-    def __init__(self, root: typing.Any):
+    def __init__(self, root: Any):
         import tkinter as tk
         from tkinter import ttk
 
@@ -82,7 +82,7 @@ class PhantomSecWindow:
         self.ttk = ttk
         self.root = root
         self.store = Store()
-        self.results: queue.Queue[tuple[str, typing.Any]] = queue.Queue()
+        self.results: queue.Queue[tuple[str, Any]] = queue.Queue()
         self.selected_module: Module | None = None
         self.visible_modules: list[Module] = []
         self.input_value = tk.StringVar()
@@ -262,12 +262,12 @@ class PhantomSecWindow:
             self.tool_list.insert("end", "No matching tools")
         self.status_value.set(f"{len(modules)} TOOLS SHOWN  ·  {mode}")
 
-    def _catalogue_selection(self, _event: typing.Any = None) -> None:
+    def _catalogue_selection(self, _event: Any = None) -> None:
         selection = self.tool_list.curselection()
         if selection and selection[0] < len(self.visible_modules):
             self.status_value.set(f"SELECTED  ·  {self.visible_modules[selection[0]].module_id}")
 
-    def _open_selected(self, _event: typing.Any = None) -> None:
+    def _open_selected(self, _event: Any = None) -> None:
         selection = self.tool_list.curselection()
         if not selection or selection[0] >= len(self.visible_modules):
             return
