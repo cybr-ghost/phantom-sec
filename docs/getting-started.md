@@ -1,88 +1,81 @@
 # Getting Started
 
-This guide helps you install Phantom Sec and open it for the first time.
+This guide explains the simplest way to install Phantom Sec, plus the developer setup if you want to work on its source code.
 
-## 1. What you need
+## 1. Choose your download
 
-- Windows 10/11 or a supported Linux distribution.
-- Python 3.10 or newer.
-- An internet connection for the initial download and installation.
-- PowerShell on Windows, or a terminal on Linux.
+Open the [GitHub Actions page](https://github.com/cybr-ghost/phantom-sec/actions) and select the latest successful build for your operating system. Open its **Artifacts** section and download the matching package. Artifacts are temporary during the early preview; tagged releases will also publish permanent downloads on the [Releases page](https://github.com/cybr-ghost/phantom-sec/releases).
 
-macOS is not an officially supported target yet.
+- **Linux x86_64:** `Phantom-Sec-x86_64.AppImage`
+- **Windows 10/11 x64 installer:** `Phantom-Sec-Setup-x64.exe`
+- **Windows 10/11 x64 portable:** `Phantom-Sec-Windows-x64.zip`
 
-## 2. Download the project
+## 2. Install on Linux
 
-Open PowerShell or a terminal and run:
+1. Download the AppImage.
+2. Open a terminal in the folder where it was downloaded.
+3. Run:
 
-```text
-git clone https://github.com/cybr-ghost/phantom-sec.git
-cd phantom-sec
+```bash
+chmod +x Phantom-Sec-x86_64.AppImage
+./Phantom-Sec-x86_64.AppImage
 ```
 
-## 3. Create a private Python environment
+If Arch Linux reports a FUSE compatibility error, run `sudo pacman -S fuse2` and try again. Alternatively, use `./Phantom-Sec-x86_64.AppImage --appimage-extract-and-run`.
 
-**Windows PowerShell:**
+## 3. Install on Windows
 
-```powershell
-py -3 -m venv .venv
-.\.venv\Scripts\Activate.ps1
-```
+**Normal installation:** download and open `Phantom-Sec-Setup-x64.exe`, follow the setup wizard, then launch Phantom Sec from the Start menu.
 
-If PowerShell blocks activation, use the environment's Python directly:
+**Portable version:** download `Phantom-Sec-Windows-x64.zip`, extract it, and double-click `Phantom-Sec.exe`. No setup wizard is needed.
 
-```powershell
-.\.venv\Scripts\python.exe -m pip install -e .
-.\.venv\Scripts\phantom-sec.exe gui
-```
+Early builds may show a Microsoft SmartScreen warning because the installer is not code-signed yet. Only use packages downloaded from the official Phantom Sec GitHub repository.
+
+## 4. Developer installation (optional)
+
+You only need this if you want to edit the source code or run the CLI directly. Python 3.10 or newer is required.
 
 **Linux:**
 
 ```bash
+git clone https://github.com/cybr-ghost/phantom-sec.git
+cd phantom-sec
 python3 -m venv .venv
 source .venv/bin/activate
-```
-
-## 4. Install Phantom Sec
-
-With the environment active, run:
-
-```text
 python -m pip install -e .
-```
-
-For development and tests:
-
-```text
-python -m pip install -e ".[dev]"
-```
-
-## 5. Start the desktop app
-
-```text
+phantom-sec doctor
 phantom-sec gui
 ```
 
-The Phantom Sec desktop window opens. Search for a tool, select it, enter any requested value, and choose **Run tool**.
+**Windows PowerShell:**
 
-You can also use the terminal menu with `phantom-sec menu`.
-
-## 6. Try a safe first command
-
-```text
-phantom-sec run system.info
-phantom-sec run system.overview
-phantom-sec run system.battery
+```powershell
+git clone https://github.com/cybr-ghost/phantom-sec.git
+cd phantom-sec
+py -3 -m venv .venv
+.\\.venv\\Scripts\\Activate.ps1
+python -m pip install -e .
+phantom-sec doctor
+phantom-sec gui
 ```
 
-The system overview includes local computer information, uptime, memory, storage, process count, network interface names, and firewall status. Battery information is shown when the computer exposes it.
+If PowerShell blocks activation, use the environment's executable directly:
+
+```powershell
+.\\.venv\\Scripts\\python.exe -m pip install -e .
+.\\.venv\\Scripts\\phantom-sec.exe gui
+```
+
+## 5. First launch
+
+The desktop app opens to the dashboard. Choose **Tool library**, search for a tool, select it, enter any requested value, and choose **Run tool**. Start with read-only tools such as System Overview or File SHA-256.
 
 ## Troubleshooting
 
-- **Command not found:** Check that the virtual environment is active.
-- **PowerShell blocks activation:** Use the environment's Python and executable directly as shown above.
-- **Desktop window does not open:** Your Python installation may be missing Tk support. Install the Tk package supplied by your Linux distribution, or use `phantom-sec menu` in the meantime.
-- **Python is too old:** Install Python 3.10 or newer.
-- **Installation errors:** Check your internet connection and read the error printed in the terminal.
+- **Linux says permission denied:** run `chmod +x Phantom-Sec-x86_64.AppImage` in the download folder.
+- **Linux reports FUSE is missing:** install `fuse2` on Arch, or use `--appimage-extract-and-run`.
+- **Windows SmartScreen appears:** early builds are not code-signed. Verify the download came from the official repository before proceeding.
+- **Desktop app does not open:** use the developer installation and check whether your operating system has desktop/Tk support.
+- **CLI says command not found:** this applies to the developer install; activate the virtual environment first.
 
-For examples of the current commands, see the [Beginner's User Guide](user-guide.md).
+For help with individual tools, see the [Beginner's User Guide](user-guide.md).

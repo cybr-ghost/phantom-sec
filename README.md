@@ -32,16 +32,32 @@ If a command or word is unfamiliar, check the [Beginner's glossary](docs/glossar
 
 ## Install it
 
-**Arch Linux and other x86_64 Linux desktops:** download the latest `Phantom-Sec-x86_64.AppImage` from the successful **Build Linux AppImage** run in the [Actions tab](https://github.com/cybr-ghost/phantom-sec/actions). Tagged version releases will also attach the file to the [Releases page](https://github.com/cybr-ghost/phantom-sec/releases). Make it executable and launch it:
+Choose the download for your operating system from the latest successful build in the [GitHub Actions tab](https://github.com/cybr-ghost/phantom-sec/actions). Versioned releases will also be published on the [Releases page](https://github.com/cybr-ghost/phantom-sec/releases).
+
+### Linux (x86_64)
+
+1. Download `Phantom-Sec-x86_64.AppImage` from the **Build Linux AppImage** workflow artifact.
+2. Open a terminal in the download folder.
+3. Run:
 
 ```bash
 chmod +x Phantom-Sec-x86_64.AppImage
 ./Phantom-Sec-x86_64.AppImage
 ```
 
-The AppImage opens the desktop interface and includes the Python runtime and project dependencies. On systems without the FUSE 2 compatibility library, install `fuse2` (Arch: `sudo pacman -S fuse2`) or try `./Phantom-Sec-x86_64.AppImage --appimage-extract-and-run`.
+The AppImage contains the app runtime and Python dependencies. If it reports a FUSE error on Arch Linux, install compatibility support with `sudo pacman -S fuse2`, or run it with `./Phantom-Sec-x86_64.AppImage --appimage-extract-and-run`.
 
-**Build it yourself / use the developer install:** Python 3.10 or newer is required.
+### Windows 10/11 (x64)
+
+1. Download `Phantom-Sec-Setup-x64.exe` for a normal installation, or `Phantom-Sec-Windows-x64.zip` for the portable version, from the **Build Windows** workflow artifact.
+2. For the installer, open the EXE and follow the setup steps. For the portable version, extract the ZIP and open `Phantom-Sec.exe`.
+3. Launch **Phantom Sec** from the Start menu or desktop shortcut (installer), or from the extracted folder (portable).
+
+Windows may show a SmartScreen warning because early project builds are not code-signed. Only download builds from this official repository and inspect the release notes/checksums before running them.
+
+### Developer installation (Linux or Windows)
+
+Python 3.10 or newer is required. Clone the project and install it in a virtual environment:
 
 ```bash
 git clone https://github.com/cybr-ghost/phantom-sec.git
@@ -53,17 +69,7 @@ phantom-sec doctor
 phantom-sec gui
 ```
 
-**Windows PowerShell:**
-
-```powershell
-git clone https://github.com/cybr-ghost/phantom-sec.git
-cd phantom-sec
-py -3 -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install -e .
-phantom-sec doctor
-phantom-sec gui
-```
+On Windows PowerShell, use `py -3 -m venv .venv`, then `.\\.venv\\Scripts\\Activate.ps1`, then `python -m pip install -e .` and `phantom-sec gui`.
 
 For development and tests, install the extra tools with `python -m pip install -e ".[dev]"`.
 
