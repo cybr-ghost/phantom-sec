@@ -2,9 +2,9 @@
 
 ## What is Phantom Sec?
 
-Phantom Sec is an open-source project that aims to bring defensive security, responsible OSINT, network diagnostics, and system administration tools into one organized application.
+Phantom Sec is an open-source project that brings defensive security, responsible OSINT, network diagnostics, and basic system information tools into one organised application.
 
-The current version is an early Python command-line preview, not a finished security suite.
+The current version is an early preview, not a finished security suite.
 
 ## Who is it for?
 
@@ -12,6 +12,14 @@ The current version is an early Python command-line preview, not a finished secu
 - Developers who want to contribute to an open-source project.
 - System administrators who need simple local information tools.
 - Users who want to understand basic network and file information.
+
+## What is included today?
+
+- A command-line app and a desktop interface.
+- 24 built-in tools for computer information, files, network diagnostics, websites, and domain information.
+- Local run history, favourites, and simple preferences.
+- JSON and CSV exports.
+- Automated tests for supported Python versions on Linux and Windows.
 
 ## Main parts of the planned application
 
@@ -24,7 +32,7 @@ The current version is an early Python command-line preview, not a finished secu
 
 ## Safety rules
 
-- Use Phantom Sec only for learning, defensive work, and authorized testing.
+- Use Phantom Sec only for learning, defensive work, and authorised testing.
 - Do not collect passwords or private credentials.
 - Do not use it to track or expose private individuals.
 - Do not automatically run untrusted community code.
@@ -32,10 +40,10 @@ The current version is an early Python command-line preview, not a finished secu
 
 ## Current platform
 
-Linux is the first development target. Windows support is planned for later testing. macOS support may be considered in the future.
+Linux and Windows are supported development platforms. macOS support may be considered in the future.
 
 ## Current status
 
-The preview includes a command-line app, 15 built-in tools, local history, simple preferences, and JSON/CSV exports. Many larger features described in project documents are still planned.
+The project is under active development. Some features described in the roadmap are still planned.
 
-See the [Development Plan](WHAT_WE_ARE_BUILDING.md) for the next milestones.
+See the [Development Roadmap](roadmap.md) for the next milestones.

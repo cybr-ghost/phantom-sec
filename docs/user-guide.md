@@ -123,4 +123,4 @@ phantom-sec validate-module module.json
 
 This checks the description only. Phantom Sec does not currently run code from community modules.
 
-For more terms, see the [Glossary](GLOSSARY.md).
+For more terms, see the [Glossary](glossary.md).

@@ -17,7 +17,7 @@ Phantom Sec is split into smaller Python files. Each file has a clear job, which
 1. You enter a command or choose a tool in the menu.
 2. Phantom Sec finds the selected built-in tool.
 3. The tool performs its supported task.
-4. The result is displayed in your terminal.
+4. The result is displayed in your terminal or desktop app.
 5. The run is saved in local history.
 
 ## System overview
@@ -33,5 +33,6 @@ The Workshop checks module description files. It does not execute third-party co
 - Python for the application.
 - Rich for readable terminal output.
 - SQLite for local history and settings.
+- Tk for the desktop interface.
 - pytest for tests.
 - GitHub Actions for automated project checks.
