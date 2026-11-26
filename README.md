@@ -10,7 +10,7 @@
 2. Follow the installation steps.
 3. Check your setup with `phantom-sec doctor`.
 4. Open the app by running `phantom-sec`.
-5. Open the desktop app with `phantom-sec gui`, or read the [Beginner's User Guide](docs/USER_GUIDE.md).
+5. Open the desktop app with `phantom-sec` or `phantom-sec gui`, or read the [Beginner's User Guide](docs/USER_GUIDE.md).
 
 If a command or word is unfamiliar, check the [Glossary](docs/GLOSSARY.md).
 
@@ -28,7 +28,7 @@ If a command or word is unfamiliar, check the [Glossary](docs/GLOSSARY.md).
 
 ## Install it
 
-You need Python 3.10 or newer. Linux is the first development platform.
+You need Python 3.10 or newer. Linux and Windows are supported development platforms.
 
 ```bash
 git clone https://github.com/cybr-ghost/phantom-sec.git
@@ -37,7 +37,7 @@ python -m venv .venv
 source .venv/bin/activate
 python -m pip install -e .
 phantom-sec doctor
-phantom-sec gui
+phantom-sec gui gui
 ```
 
 For development and tests, install the extra tools with `python -m pip install -e ".[dev]"`.

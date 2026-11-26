@@ -4,83 +4,85 @@ This guide helps you install Phantom Sec and open it for the first time.
 
 ## 1. What you need
 
-- A computer running Linux (the first development platform).
+- Windows 10/11 or a supported Linux distribution.
 - Python 3.10 or newer.
 - An internet connection for the initial download and installation.
-- A terminal window.
+- PowerShell on Windows, or a terminal on Linux.
 
-Windows and macOS are not official supported targets yet.
+macOS is not an officially supported target yet.
 
 ## 2. Download the project
 
-Open a terminal and run:
+Open PowerShell or a terminal and run:
 
-```bash
+\`\`\`text
 git clone https://github.com/cybr-ghost/phantom-sec.git
 cd phantom-sec
-```
-
-The first command downloads the project. The second moves your terminal into the project folder.
+\`\`\`
 
 ## 3. Create a private Python environment
 
-Run:
+**Windows PowerShell:**
 
-```bash
-python -m venv .venv
+\`\`\`powershell
+py -3 -m venv .venv
+.\\.venv\\Scripts\\Activate.ps1
+\`\`\`
+
+If PowerShell blocks activation, use the environment's Python directly:
+
+\`\`\`powershell
+.\\.venv\\Scripts\\python.exe -m pip install -e .
+.\\.venv\\Scripts\\phantom-sec.exe
+\`\`\`
+
+**Linux:**
+
+\`\`\`bash
+python3 -m venv .venv
 source .venv/bin/activate
-```
-
-This creates a separate Python environment for Phantom Sec, so its packages do not interfere with other projects.
-
-When it is active, your terminal usually shows `.venv` near the start of the command line.
+\`\`\`
 
 ## 4. Install Phantom Sec
 
-```bash
+With the environment active, run:
+
+\`\`\`text
 python -m pip install -e .
-```
+\`\`\`
 
-Wait for the installation to finish.
+For development and tests:
 
-If you also want to help develop the project or run its tests, use:
-
-```bash
+\`\`\`text
 python -m pip install -e ".[dev]"
-```
+\`\`\`
 
-## 5. Start Phantom Sec
+## 5. Start the desktop app
 
-```bash
+\`\`\`text
 phantom-sec
-```
+\`\`\`
 
 The Phantom Sec desktop window opens. Search for a tool, select it, enter any requested value, and choose **Run tool**.
 
-You can also list the tools without opening the menu:
+You can also launch the desktop app explicitly with \`phantom-sec gui\`, or use the terminal menu with \`phantom-sec menu\`.
 
-```bash
-phantom-sec list
-```
+## 6. Try a safe first command
 
-## 7. Try a safe first command
-
-For example, show basic information about your computer:
-
-```bash
+\`\`\`text
 phantom-sec run system.info
-```
+phantom-sec run system.overview
+phantom-sec run system.battery
+\`\`\`
 
-Or look up the DNS information for a public example domain:
-
-```bash
-phantom-sec run network.dns --domain example.com
-```
+The system overview includes local computer information, uptime, memory, storage, process count, network interface names, and firewall status. Battery information is shown when the computer exposes it.
 
 ## Troubleshooting
 
-- **Command not found:** Check that the virtual environment is active. Run `source .venv/bin/activate` from the project folder.
+- **Command not found:** Check that the virtual environment is active.
+- **PowerShell blocks activation:** Use the environment's Python and executable directly as shown above.
+- **Desktop window does not open:** Your Python installation may be missing Tk support. Install the Tk package supplied by your Linux distribution, or use \`phantom-sec menu\` in the meantime.
 - **Python is too old:** Install Python 3.10 or newer.
 - **Installation errors:** Check your internet connection and read the error printed in the terminal.
 
-If the graphical window cannot start, your Python installation may be missing Tk support. On Linux, install the Tk package supplied by your distribution. For examples of every current command, see the [Beginner's User Guide](USER_GUIDE.md).
+For examples of every current command, see the [Beginner's User Guide](USER_GUIDE.md).

@@ -25,7 +25,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="phantom-sec",
         description="A beginner-friendly toolkit for defensive security and computer checks.",
-        epilog="Tip: run 'phantom-sec' without a command to open the interactive menu.",
+        epilog="Tip: run 'phantom-sec' to open the desktop app, or 'phantom-sec menu' for the terminal menu.",
     )
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     sub = parser.add_subparsers(dest="command")
@@ -127,9 +127,17 @@ def run_doctor() -> int:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    if args.command in (None, "menu"):
+    if args.command == "menu":
         interactive_menu()
         return 0
+    if args.command is None:
+        try:
+            from phantom_sec.gui import launch_gui
+            return launch_gui()
+        except RuntimeError as exc:
+            console.print(f"[red]Desktop interface unavailable:[/red] {exc}")
+            console.print("You can still use the terminal interface with: phantom-sec menu")
+            return 2
     if args.command == "doctor":
         return run_doctor()
     if args.command == "gui":

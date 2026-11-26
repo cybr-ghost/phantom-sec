@@ -1,7 +1,7 @@
 from phantom_sec.cli import build_parser, run_doctor
 
 
-def test_default_command_opens_menu():
+def test_default_command_is_desktop_app_entry_point():
     assert build_parser().parse_args([]).command is None
 
 
@@ -18,3 +18,7 @@ def test_run_command_accepts_domain_option():
 def test_doctor_passes_with_writable_home(tmp_path, monkeypatch):
     monkeypatch.setattr("pathlib.Path.home", lambda: tmp_path)
     assert run_doctor() == 0
+
+
+def test_menu_command_is_available_for_terminal_mode():
+    assert build_parser().parse_args(["menu"]).command == "menu"

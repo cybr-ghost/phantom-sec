@@ -8,7 +8,7 @@ def test_uptime_tool_is_registered():
 def test_uptime_result_has_clear_supported_or_unsupported_status():
     result = run_module("system.uptime")["result"]
     assert "platform" in result
-    if result["platform"] == "Linux" and result["uptime_seconds"] is not None:
+    if result["platform"] in {"Linux", "Windows"} and result["uptime_seconds"] is not None:
         assert result["uptime_seconds"] >= 0
         assert result["uptime_human"]
     else:

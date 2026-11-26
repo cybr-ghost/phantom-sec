@@ -39,7 +39,9 @@ def system_uptime(**_: Any) -> dict[str, Any]:
     current_platform = platform.system()
     if current_platform == "Windows":
         try:
-            uptime_seconds = int(ctypes.windll.kernel32.GetTickCount64() // 1000)
+            tick_counter = ctypes.windll.kernel32.GetTickCount64
+            tick_counter.restype = ctypes.c_ulonglong
+            uptime_seconds = int(tick_counter() // 1000)
         except (AttributeError, OSError) as exc:
             return {"platform": "Windows", "uptime_seconds": None,
                     "note": f"Could not read Windows uptime: {exc}"}
