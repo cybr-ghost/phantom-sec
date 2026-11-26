@@ -32,6 +32,17 @@ def search_modules(query: str = "", category: str = "All tools") -> list[Module]
     ]
 
 
+def dashboard_summary(store: Store) -> dict[str, Any]:
+    """Return small, local-only dashboard statistics."""
+    modules = get_modules()
+    recent = store.history(1)
+    return {
+        "tool_count": len(modules),
+        "category_count": len({module.category for module in modules}),
+        "recent_run": recent[0] if recent else None,
+    }
+
+
 def input_kind(module_id: str) -> str | None:
     """Return the single input field needed by a built-in tool, if any."""
     if module_id.startswith("file.") or module_id == "system.disk":
@@ -64,6 +75,7 @@ class PhantomSecWindow:
         self._build_styles()
         self._build_layout()
         self._refresh_catalogue()
+        self._refresh_dashboard()
         self.root.after(120, self._poll_results)
         self.root.bind("<Control-k>", lambda _event: self.search_entry.focus_set())
         self.root.bind("<Control-K>", lambda _event: self.search_entry.focus_set())
@@ -129,12 +141,15 @@ class PhantomSecWindow:
 
         self.notebook = ttk.Notebook(self.root)
         self.notebook.pack(fill="both", expand=True, padx=20, pady=(0, 12))
+        self.dashboard_tab = ttk.Frame(self.notebook, padding=24)
         self.tools_tab = ttk.Frame(self.notebook, padding=16)
         self.history_tab = ttk.Frame(self.notebook, padding=16)
         self.about_tab = ttk.Frame(self.notebook, padding=16)
+        self.notebook.add(self.dashboard_tab, text="Dashboard")
         self.notebook.add(self.tools_tab, text="Tool library")
         self.notebook.add(self.history_tab, text="Run history")
         self.notebook.add(self.about_tab, text="About")
+        self._build_dashboard_tab()
         self._build_tools_tab()
         self._build_history_tab()
         self._build_about_tab()
@@ -144,6 +159,52 @@ class PhantomSecWindow:
         ttk.Label(footer, textvariable=self.status_value, style="Muted.TLabel").pack(side="left")
         ttk.Label(footer, text="Use only on systems you own or are authorized to assess.",
                   style="Muted.TLabel").pack(side="right")
+
+    def _build_dashboard_tab(self) -> None:
+        ttk = self.ttk
+        panel = ttk.Frame(self.dashboard_tab, style="Panel.TFrame", padding=24)
+        panel.pack(fill="both", expand=True)
+        ttk.Label(panel, text="Welcome to Phantom Sec", style="Section.TLabel").pack(
+            anchor="w")
+        ttk.Label(
+            panel,
+            text="A quick snapshot of your local toolkit and recent activity.",
+            style="Muted.TLabel",
+        ).pack(anchor="w", pady=(5, 22))
+
+        stats = ttk.Frame(panel, style="Panel.TFrame")
+        stats.pack(fill="x", pady=(0, 20))
+        self.dashboard_tools = ttk.Label(stats, text="Built-in tools: —", style="Section.TLabel")
+        self.dashboard_tools.pack(anchor="w", pady=5)
+        self.dashboard_categories = ttk.Label(
+            stats, text="Tool categories: —", style="Section.TLabel")
+        self.dashboard_categories.pack(anchor="w", pady=5)
+        self.dashboard_recent = ttk.Label(
+            stats, text="Latest run: No runs recorded yet", style="Panel.TLabel")
+        self.dashboard_recent.pack(anchor="w", pady=(12, 5))
+
+        actions = ttk.Frame(panel, style="Panel.TFrame")
+        actions.pack(anchor="w", pady=(12, 0))
+        ttk.Button(actions, text="Open tool library", style="Accent.TButton",
+                   command=lambda: self.notebook.select(self.tools_tab)).pack(side="left")
+        ttk.Button(actions, text="Refresh dashboard",
+                   command=self._refresh_dashboard).pack(side="left", padx=(10, 0))
+
+    def _refresh_dashboard(self) -> None:
+        if not hasattr(self, "dashboard_tools"):
+            return
+        summary = dashboard_summary(self.store)
+        self.dashboard_tools.configure(
+            text=f"Built-in tools: {summary['tool_count']}")
+        self.dashboard_categories.configure(
+            text=f"Tool categories: {summary['category_count']}")
+        recent = summary["recent_run"]
+        if recent:
+            stamp = recent["created_at"].replace("T", " ").replace("+00:00", " UTC")
+            self.dashboard_recent.configure(
+                text=f"Latest run: {recent['module_id']}  ·  {stamp}")
+        else:
+            self.dashboard_recent.configure(text="Latest run: No runs recorded yet")
 
     def _build_tools_tab(self) -> None:
         tk, ttk = self.tk, self.ttk
@@ -374,6 +435,7 @@ class PhantomSecWindow:
                     self._set_output(json.dumps(payload, indent=2, ensure_ascii=False, default=str))
                     self.status_value.set("Tool completed successfully")
                     self._refresh_history()
+                    self._refresh_dashboard()
                 else:
                     self._set_output(f"Tool could not finish:\n{payload}")
                     self.status_value.set("Tool returned an error")

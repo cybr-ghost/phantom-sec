@@ -1,4 +1,5 @@
-from phantom_sec.gui import PhantomSecWindow, input_kind, search_modules
+from phantom_sec.gui import PhantomSecWindow, dashboard_summary, input_kind, search_modules
+from phantom_sec.local_history import Store
 
 
 def test_search_matches_tool_name_id_and_description():
@@ -27,3 +28,15 @@ def test_input_fields_are_mapped_for_existing_tools():
 
 def test_export_action_is_part_of_the_window_class():
     assert callable(getattr(PhantomSecWindow, "_export_output", None))
+
+
+def test_dashboard_summary_reports_tools_categories_and_recent_run(tmp_path):
+    store = Store(tmp_path / "dashboard.sqlite3")
+    empty = dashboard_summary(store)
+    assert empty["tool_count"] == 17
+    assert empty["category_count"] >= 3
+    assert empty["recent_run"] is None
+
+    store.record_run("system.info", {"ok": True})
+    summary = dashboard_summary(store)
+    assert summary["recent_run"]["module_id"] == "system.info"
