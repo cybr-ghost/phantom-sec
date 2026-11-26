@@ -10,7 +10,6 @@ import zipfile
 from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any
 
-
 _SIGNATURES = (
     (b"\x7fELF", "ELF executable or shared object"),
     (b"MZ", "Windows PE/DOS executable (signature only)"),
