@@ -9,7 +9,6 @@ from __future__ import annotations
 import json
 import queue
 import threading
-from datetime import datetime
 from typing import Any
 
 from phantom_sec import __version__
@@ -118,7 +117,7 @@ class PhantomSecWindow:
                   foreground=[("selected", "#ffffff")])
 
     def _build_layout(self) -> None:
-        tk, ttk = self.tk, self.ttk
+        ttk = self.ttk
         header = ttk.Frame(self.root, padding=(24, 18, 24, 12))
         header.pack(fill="x")
         brand = ttk.Frame(header)
@@ -210,7 +209,7 @@ class PhantomSecWindow:
 
         actions = ttk.Frame(detail, style="Panel.TFrame")
         actions.grid(row=5, column=0, sticky="nsew")
-        actions.rowconfigure(1, weight=1)
+        actions.rowconfigure(2, weight=1)
         actions.columnconfigure(0, weight=1)
         top_actions = ttk.Frame(actions, style="Panel.TFrame")
         top_actions.grid(row=0, column=0, sticky="ew", pady=(0, 8))
