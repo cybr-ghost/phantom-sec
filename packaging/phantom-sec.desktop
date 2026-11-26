@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Phantom Sec
+Comment=Local defensive security workbench
+Exec=phantom-sec
+Icon=phantom-sec
+Categories=Utility;Security;
+Terminal=false
+StartupNotify=true

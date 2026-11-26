@@ -32,9 +32,16 @@ If a command or word is unfamiliar, check the [Beginner's glossary](docs/glossar
 
 ## Install it
 
-You need Python 3.10 or newer. Linux and Windows are supported.
+**Arch Linux and other x86_64 Linux desktops:** download the latest `Phantom-Sec-x86_64.AppImage` from [GitHub Actions releases](https://github.com/cybr-ghost/phantom-sec/releases). Make it executable and launch it:
 
-**Linux:**
+```bash
+chmod +x Phantom-Sec-x86_64.AppImage
+./Phantom-Sec-x86_64.AppImage
+```
+
+The AppImage opens the desktop interface and includes the Python runtime and project dependencies. On systems without the FUSE 2 compatibility library, install `fuse2` (Arch: `sudo pacman -S fuse2`) or try `./Phantom-Sec-x86_64.AppImage --appimage-extract-and-run`.
+
+**Build it yourself / use the developer install:** Python 3.10 or newer is required.
 
 ```bash
 git clone https://github.com/cybr-ghost/phantom-sec.git
