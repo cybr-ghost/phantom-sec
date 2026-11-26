@@ -1,7 +1,7 @@
-"""Native desktop interface for Phantom Sec.
+"""Retro terminal desktop interface for Phantom Sec.
 
-The interface uses Python's standard-library Tk toolkit and performs tool runs
-in a worker thread so the window stays responsive.
+The catalogue and individual tool sessions share one window. Built-in tools run
+through their registered handlers; the input box is a tool parameter, not a shell.
 """
 
 from __future__ import annotations
@@ -14,6 +14,16 @@ from typing import Any
 from phantom_sec import __version__
 from phantom_sec.local_history import Store
 from phantom_sec.modules import Module, get_modules, run_module
+
+
+BLACK = "#080808"
+PANEL = "#111111"
+WHITE = "#eeeeee"
+GREY = "#999999"
+DIM = "#666666"
+RED = "#ed3038"
+FONT = ("Cascadia Mono", 10)
+FONT_BOLD = ("Cascadia Mono", 10, "bold")
 
 
 def search_modules(query: str = "", category: str = "All tools") -> list[Module]:
@@ -33,7 +43,7 @@ def search_modules(query: str = "", category: str = "All tools") -> list[Module]
 
 
 def dashboard_summary(store: Store) -> dict[str, Any]:
-    """Return small, local-only dashboard statistics."""
+    """Return local catalogue and activity statistics."""
     modules = get_modules()
     recent = store.history(1)
     return {
@@ -45,7 +55,7 @@ def dashboard_summary(store: Store) -> dict[str, Any]:
 
 
 def input_kind(module_id: str) -> str | None:
-    """Return the single input field needed by a built-in tool, if any."""
+    """Return the single parameter required by a built-in tool, if any."""
     if module_id.startswith("file.") or module_id == "system.disk":
         return "path"
     if module_id == "network.dns" or module_id.startswith("domain."):
@@ -62,7 +72,7 @@ def input_kind(module_id: str) -> str | None:
 
 
 class PhantomSecWindow:
-    """Build and run the Phantom Sec desktop window."""
+    """Single-window terminal-style Phantom Sec application."""
 
     def __init__(self, root: Any):
         import tkinter as tk
@@ -74,25 +84,28 @@ class PhantomSecWindow:
         self.store = Store()
         self.results: queue.Queue[tuple[str, Any]] = queue.Queue()
         self.selected_module: Module | None = None
+        self.visible_modules: list[Module] = []
         self.input_value = tk.StringVar()
         self.search_value = tk.StringVar()
-        self.category_value = tk.StringVar(value="All tools")
-        self.status_value = tk.StringVar(value="Ready")
+        self.filter_value = tk.StringVar(value="ALL TOOLS")
+        self.status_value = tk.StringVar(value="READY")
+        self.current_view = "catalogue"
         self._configure_window()
         self._build_styles()
-        self._build_layout()
-        self._refresh_catalogue()
-        self._refresh_dashboard()
+        self._build_shell()
+        self._show_catalogue()
         self.root.after(120, self._poll_results)
         self.root.bind("<Control-k>", lambda _event: self.search_entry.focus_set())
         self.root.bind("<Control-K>", lambda _event: self.search_entry.focus_set())
-        self.input_entry.bind("<Return>", lambda _event: self.run_selected())
+        self.root.bind("<Escape>", lambda _event: self.back_to_catalogue())
+        self.root.bind("<Return>", lambda _event: self.run_selected()
+                       if self.current_view == "tool" else None)
 
     def _configure_window(self) -> None:
         self.root.title(f"Phantom Sec {__version__}")
         self.root.geometry("1180x760")
         self.root.minsize(900, 620)
-        self.root.configure(background="#171b18")
+        self.root.configure(background=BLACK)
 
     def _build_styles(self) -> None:
         style = self.ttk.Style(self.root)
@@ -100,352 +113,248 @@ class PhantomSecWindow:
             style.theme_use("clam")
         except self.tk.TclError:
             pass
-        style.configure(".", font=("Segoe UI", 10), background="#202722",
-                        foreground="#e9e6dc")
-        style.configure("TFrame", background="#171b18")
-        style.configure("Panel.TFrame", background="#202722")
-        style.configure("TLabel", background="#171b18", foreground="#e9e6dc")
-        style.configure("Muted.TLabel", background="#171b18", foreground="#a5aa9b")
-        style.configure("Panel.TLabel", background="#202722", foreground="#e9e6dc")
-        style.configure("Title.TLabel", font=("Segoe UI", 22, "bold"),
-                        background="#171b18", foreground="#f2efe5")
-        style.configure("Subtitle.TLabel", font=("Segoe UI", 10),
-                        background="#171b18", foreground="#a5aa9b")
-        style.configure("Section.TLabel", font=("Segoe UI", 13, "bold"),
-                        background="#202722", foreground="#f2efe5")
-        style.configure("Accent.TButton", background="#a8c6a0", foreground="#f2efe5",
-                        padding=(16, 9), borderwidth=0)
-        style.map("Accent.TButton", background=[("active", "#bdd4b4"), ("disabled", "#49554a")])
-        style.configure("TButton", padding=(10, 7), background="#303a32",
-                        foreground="#e9e6dc", borderwidth=0)
-        style.map("TButton", background=[("active", "#3c493e")])
-        style.configure("TEntry", fieldbackground="#29322b", foreground="#f2efe5",
-                        insertcolor="#f2efe5", padding=9, borderwidth=0)
-        style.configure("TCombobox", fieldbackground="#29322b", foreground="#f2efe5",
-                        padding=7)
-        style.configure("Treeview", background="#202722", fieldbackground="#202722",
-                        foreground="#e9e6dc", rowheight=31, borderwidth=0)
-        style.configure("Treeview.Heading", background="#303a32", foreground="#d8c8a8",
-                        font=("Segoe UI", 9, "bold"), relief="flat")
-        style.map("Treeview", background=[("selected", "#465b49")],
-                  foreground=[("selected", "#f2efe5")])
-        style.configure("TNotebook", background="#171b18", borderwidth=0)
-        style.configure("TNotebook.Tab", background="#29322b", foreground="#d8c8a8",
-                        padding=(14, 9))
-        style.map("TNotebook.Tab", background=[("selected", "#202722")],
-                  foreground=[("selected", "#f2efe5")])
+        style.configure(".", font=FONT, background=BLACK, foreground=WHITE)
+        style.configure("TFrame", background=BLACK)
+        style.configure("Panel.TFrame", background=PANEL)
+        style.configure("TLabel", background=BLACK, foreground=WHITE, font=FONT)
+        style.configure("Muted.TLabel", background=BLACK, foreground=GREY, font=FONT)
+        style.configure("Panel.TLabel", background=PANEL, foreground=WHITE, font=FONT)
+        style.configure("TButton", background="#202020", foreground=WHITE,
+                        borderwidth=1, relief="flat", padding=(10, 7), font=FONT)
+        style.map("TButton", background=[("active", "#303030")],
+                  foreground=[("active", WHITE)])
+        style.configure("TEntry", fieldbackground="#111111", foreground=WHITE,
+                        insertcolor=WHITE, borderwidth=1, padding=9, font=FONT)
+        style.configure("Treeview", background=PANEL, fieldbackground=PANEL,
+                        foreground=WHITE, rowheight=29, borderwidth=0, font=FONT)
+        style.configure("Treeview.Heading", background="#202020", foreground=WHITE,
+                        font=FONT_BOLD, relief="flat")
 
-    def _build_layout(self) -> None:
+    def _build_shell(self) -> None:
         ttk = self.ttk
-        header = ttk.Frame(self.root, padding=(24, 18, 24, 12))
+        header = ttk.Frame(self.root, padding=(22, 10, 22, 8))
         header.pack(fill="x")
-        brand = ttk.Frame(header)
-        brand.pack(side="left")
-        ttk.Label(brand, text="PHANTOM SEC", style="Title.TLabel").pack(anchor="w")
-        ttk.Label(brand, text="LOCAL SECURITY WORKBENCH  •  QUIETLY CAPABLE  •  READ-ONLY BY DEFAULT",
-                  style="Subtitle.TLabel").pack(anchor="w", pady=(2, 0))
-        ttk.Label(header, text=f"v{__version__}", style="Muted.TLabel").pack(side="right", anchor="n")
-
-        self.notebook = ttk.Notebook(self.root)
-        self.notebook.pack(fill="both", expand=True, padx=20, pady=(0, 12))
-        self.dashboard_tab = ttk.Frame(self.notebook, padding=24)
-        self.tools_tab = ttk.Frame(self.notebook, padding=16)
-        self.history_tab = ttk.Frame(self.notebook, padding=16)
-        self.about_tab = ttk.Frame(self.notebook, padding=16)
-        self.notebook.add(self.dashboard_tab, text="Dashboard")
-        self.notebook.add(self.tools_tab, text="Tool library")
-        self.notebook.add(self.history_tab, text="Run history")
-        self.notebook.add(self.about_tab, text="About")
-        self._build_dashboard_tab()
-        self._build_tools_tab()
-        self._build_history_tab()
-        self._build_about_tab()
-
-        footer = ttk.Frame(self.root, padding=(22, 5, 22, 12))
+        ttk.Label(header, text="PHANTOM SEC", font=("Cascadia Mono", 11, "bold"),
+                  foreground=WHITE).pack(side="left")
+        ttk.Label(header, text=f"v{__version__}", style="Muted.TLabel").pack(side="right")
+        self.body = ttk.Frame(self.root, padding=(20, 8, 20, 8))
+        self.body.pack(fill="both", expand=True)
+        footer = ttk.Frame(self.root, padding=(20, 5, 20, 10))
         footer.pack(fill="x")
+        ttk.Separator(footer, orient="horizontal").pack(fill="x", pady=(0, 7))
         ttk.Label(footer, textvariable=self.status_value, style="Muted.TLabel").pack(side="left")
-        ttk.Label(footer, text="Use only on systems you own or are authorized to assess.",
+        ttk.Label(footer, text="LOCAL TOOLS  ·  READ-ONLY BY DEFAULT",
                   style="Muted.TLabel").pack(side="right")
 
-    def _build_dashboard_tab(self) -> None:
-        ttk = self.ttk
-        panel = ttk.Frame(self.dashboard_tab, style="Panel.TFrame", padding=24)
-        panel.pack(fill="both", expand=True)
-        ttk.Label(panel, text="Welcome to Phantom Sec", style="Section.TLabel").pack(
-            anchor="w")
-        ttk.Label(
-            panel,
-            text="A quick snapshot of your local toolkit and recent activity.",
-            style="Muted.TLabel",
-        ).pack(anchor="w", pady=(5, 22))
+    def _clear_body(self) -> None:
+        for child in self.body.winfo_children():
+            child.destroy()
 
-        stats = ttk.Frame(panel, style="Panel.TFrame")
-        stats.pack(fill="x", pady=(0, 20))
-        self.dashboard_tools = ttk.Label(stats, text="Built-in tools: —", style="Section.TLabel")
-        self.dashboard_tools.pack(anchor="w", pady=5)
-        self.dashboard_categories = ttk.Label(
-            stats, text="Tool categories: —", style="Section.TLabel")
-        self.dashboard_categories.pack(anchor="w", pady=5)
-        self.dashboard_recent = ttk.Label(
-            stats, text="Latest run: No runs recorded yet", style="Panel.TLabel")
-        self.dashboard_recent.pack(anchor="w", pady=(12, 5))
-        self.dashboard_favorites = ttk.Label(
-            stats, text="Favourite tools: 0", style="Panel.TLabel")
-        self.dashboard_favorites.pack(anchor="w", pady=5)
-
-        actions = ttk.Frame(panel, style="Panel.TFrame")
-        actions.pack(anchor="w", pady=(12, 0))
-        ttk.Button(actions, text="Open tool library", style="Accent.TButton",
-                   command=lambda: self.notebook.select(self.tools_tab)).pack(side="left")
-        ttk.Button(actions, text="Refresh dashboard",
-                   command=self._refresh_dashboard).pack(side="left", padx=(10, 0))
-
-    def _refresh_dashboard(self) -> None:
-        if not hasattr(self, "dashboard_tools"):
-            return
-        summary = dashboard_summary(self.store)
-        self.dashboard_tools.configure(
-            text=f"Built-in tools: {summary['tool_count']}")
-        self.dashboard_categories.configure(
-            text=f"Tool categories: {summary['category_count']}")
-        self.dashboard_favorites.configure(
-            text=f"Favourite tools: {summary['favorite_count']}")
-        recent = summary["recent_run"]
-        if recent:
-            stamp = recent["created_at"].replace("T", " ").replace("+00:00", " UTC")
-            self.dashboard_recent.configure(
-                text=f"Latest run: {recent['module_id']}  ·  {stamp}")
-        else:
-            self.dashboard_recent.configure(text="Latest run: No runs recorded yet")
-
-    def _build_tools_tab(self) -> None:
+    def _show_catalogue(self) -> None:
         tk, ttk = self.tk, self.ttk
-        self.tools_tab.columnconfigure(0, weight=0, minsize=330)
-        self.tools_tab.columnconfigure(1, weight=1)
-        self.tools_tab.rowconfigure(0, weight=1)
+        self.current_view = "catalogue"
+        self.selected_module = None
+        self._clear_body()
+        self.body.columnconfigure(0, weight=1)
+        self.body.rowconfigure(3, weight=1)
 
-        sidebar = ttk.Frame(self.tools_tab, style="Panel.TFrame", padding=14)
-        sidebar.grid(row=0, column=0, sticky="nsew", padx=(0, 12))
-        sidebar.rowconfigure(3, weight=1)
-        ttk.Label(sidebar, text="Find a tool", style="Section.TLabel").grid(
-            row=0, column=0, sticky="w", pady=(0, 9))
-        self.search_entry = ttk.Entry(sidebar, textvariable=self.search_value)
-        self.search_entry.grid(row=1, column=0, sticky="ew", pady=(0, 9))
+        banner = ttk.Frame(self.body)
+        banner.grid(row=0, column=0, sticky="ew", pady=(0, 12))
+        ttk.Label(banner, text="PHANTOM SEC", font=("Cascadia Mono", 18, "bold"),
+                  foreground=WHITE).pack(anchor="center")
+        ttk.Label(banner, text="SELECT AN OPERATION MODULE",
+                  style="Muted.TLabel").pack(anchor="center", pady=(3, 0))
+
+        search_row = ttk.Frame(self.body)
+        search_row.grid(row=1, column=0, sticky="ew", pady=(0, 7))
+        search_row.columnconfigure(1, weight=1)
+        ttk.Label(search_row, text="SEARCH  >", style="Muted.TLabel").grid(
+            row=0, column=0, padx=(0, 10))
+        self.search_entry = ttk.Entry(search_row, textvariable=self.search_value)
+        self.search_entry.grid(row=0, column=1, sticky="ew")
         self.search_entry.configure(takefocus=True)
         self.search_value.trace_add("write", lambda *_: self._refresh_catalogue())
-        categories = ["All tools", "★ Favourites", *sorted({item.category for item in get_modules()})]
-        self.category_box = ttk.Combobox(
-            sidebar, textvariable=self.category_value, values=categories,
-            state="readonly",
-        )
-        self.category_box.grid(row=2, column=0, sticky="ew", pady=(0, 10))
-        self.category_box.bind("<<ComboboxSelected>>", lambda _event: self._refresh_catalogue())
+        ttk.Button(search_row, text="★ FAVOURITES",
+                   command=lambda: self._set_filter("FAVOURITES")).grid(
+                       row=0, column=2, padx=(8, 0))
+        ttk.Button(search_row, text="RECENT",
+                   command=lambda: self._set_filter("RECENT")).grid(
+                       row=0, column=3, padx=(6, 0))
+        ttk.Button(search_row, text="ALL",
+                   command=lambda: self._set_filter("ALL TOOLS")).grid(
+                       row=0, column=4, padx=(6, 0))
+
+        ttk.Label(self.body, textvariable=self.filter_value,
+                  style="Muted.TLabel").grid(row=2, column=0, sticky="w", pady=(2, 6))
+        list_frame = ttk.Frame(self.body)
+        list_frame.grid(row=3, column=0, sticky="nsew")
+        list_frame.columnconfigure(0, weight=1)
+        list_frame.rowconfigure(0, weight=1)
         self.tool_list = tk.Listbox(
-            sidebar, bg="#202722", fg="#e9e6dc", selectbackground="#465b49",
-            selectforeground="#f2efe5", highlightthickness=0, borderwidth=0,
-            activestyle="none", font=("Segoe UI", 10), exportselection=False,
+            list_frame, bg=BLACK, fg=RED, selectbackground="#292929",
+            selectforeground=RED, highlightthickness=1, highlightbackground="#444444",
+            highlightcolor="#777777", borderwidth=0, activestyle="none",
+            font=("Cascadia Mono", 11), exportselection=False,
         )
-        self.tool_list.grid(row=3, column=0, sticky="nsew")
-        list_scroll = ttk.Scrollbar(sidebar, orient="vertical", command=self.tool_list.yview)
-        list_scroll.grid(row=3, column=1, sticky="ns")
-        self.tool_list.configure(yscrollcommand=list_scroll.set)
-        self.tool_list.bind("<<ListboxSelect>>", self._on_tool_selected)
-        self.tool_list.bind("<Double-Button-1>", lambda _event: self.run_selected())
-        self.visible_modules: list[Module] = []
-        ttk.Label(sidebar, text="Tip: press Ctrl+K to search",
-                  style="Muted.TLabel").grid(row=4, column=0, sticky="w", pady=(10, 0))
-
-        detail = ttk.Frame(self.tools_tab, style="Panel.TFrame", padding=20)
-        detail.grid(row=0, column=1, sticky="nsew")
-        detail.columnconfigure(0, weight=1)
-        detail.rowconfigure(5, weight=1)
-        self.detail_category = ttk.Label(detail, text="TOOL DETAILS", style="Muted.TLabel")
-        self.detail_category.grid(row=0, column=0, sticky="w")
-        self.detail_title = ttk.Label(detail, text="Choose a tool", style="Section.TLabel")
-        self.detail_title.grid(row=1, column=0, sticky="w", pady=(7, 3))
-        self.detail_id = ttk.Label(detail, text="Select a tool from the library",
-                                   style="Muted.TLabel")
-        self.detail_id.grid(row=2, column=0, sticky="w")
-        self.detail_description = ttk.Label(
-            detail, text="Search by name, tool ID, or description. Select a result to see details.",
-            style="Panel.TLabel", wraplength=600, justify="left",
-        )
-        self.detail_description.grid(row=3, column=0, sticky="w", pady=(15, 14))
-
-        input_row = ttk.Frame(detail, style="Panel.TFrame")
-        input_row.grid(row=4, column=0, sticky="ew", pady=(0, 12))
-        input_row.columnconfigure(1, weight=1)
-        self.input_label = ttk.Label(input_row, text="Input", style="Panel.TLabel")
-        self.input_label.grid(row=0, column=0, sticky="w", padx=(0, 10))
-        self.input_entry = ttk.Entry(input_row, textvariable=self.input_value)
-        self.input_entry.grid(row=0, column=1, sticky="ew")
-        self.browse_button = ttk.Button(input_row, text="Browse…", command=self._browse_path)
-        self.browse_button.grid(row=0, column=2, padx=(8, 0))
-        self.input_row = input_row
-
-        actions = ttk.Frame(detail, style="Panel.TFrame")
-        actions.grid(row=5, column=0, sticky="nsew")
-        actions.rowconfigure(2, weight=1)
-        actions.columnconfigure(0, weight=1)
-        top_actions = ttk.Frame(actions, style="Panel.TFrame")
-        top_actions.grid(row=0, column=0, sticky="ew", pady=(0, 8))
-        self.run_button = ttk.Button(top_actions, text="Run tool", style="Accent.TButton",
-                                     command=self.run_selected, state="disabled")
-        self.run_button.pack(side="left")
-        self.favorite_button = ttk.Button(
-            top_actions, text="☆ Add favourite", command=self._toggle_favorite, state="disabled")
-        self.favorite_button.pack(side="left", padx=(8, 0))
-        ttk.Button(top_actions, text="Copy result", command=self._copy_result).pack(
-            side="left", padx=(8, 0))
-        ttk.Button(top_actions, text="Export JSON", command=self._export_output).pack(
-            side="left", padx=(8, 0))
-        ttk.Button(top_actions, text="Clear", command=self._clear_result).pack(
-            side="left", padx=(8, 0))
-        ttk.Label(actions, text="OUTPUT", style="Muted.TLabel").grid(
-            row=1, column=0, sticky="nw", pady=(3, 5))
-        output_frame = ttk.Frame(actions, style="Panel.TFrame")
-        output_frame.grid(row=2, column=0, sticky="nsew")
-        output_frame.rowconfigure(0, weight=1)
-        output_frame.columnconfigure(0, weight=1)
-        self.output = tk.Text(
-            output_frame, height=12, wrap="word", bg="#171b18", fg="#e9e6dc",
-            insertbackground="#f2efe5", selectbackground="#465b49", relief="flat",
-            padx=12, pady=10, font=("Cascadia Code", 10),
-        )
-        self.output.grid(row=0, column=0, sticky="nsew")
-        scroll = ttk.Scrollbar(output_frame, orient="vertical", command=self.output.yview)
+        self.tool_list.grid(row=0, column=0, sticky="nsew")
+        scroll = ttk.Scrollbar(list_frame, orient="vertical", command=self.tool_list.yview)
         scroll.grid(row=0, column=1, sticky="ns")
-        self.output.configure(yscrollcommand=scroll.set)
-        self.output.insert("1.0", "Results will appear here after you run a tool.")
-        self.output.configure(state="disabled")
+        self.tool_list.configure(yscrollcommand=scroll.set)
+        self.tool_list.bind("<Double-Button-1>", self._open_selected)
+        self.tool_list.bind("<Return>", self._open_selected)
+        self.tool_list.bind("<<ListboxSelect>>", self._catalogue_selection)
+        ttk.Label(self.body, text="DOUBLE-CLICK OR PRESS ENTER TO OPEN A TOOL",
+                  style="Muted.TLabel").grid(row=4, column=0, sticky="w", pady=(8, 0))
+        self._refresh_catalogue()
+        self.search_entry.focus_set()
 
-    def _build_history_tab(self) -> None:
-        ttk = self.ttk
-        self.history_tab.columnconfigure(0, weight=1)
-        self.history_tab.rowconfigure(1, weight=1)
-        heading = ttk.Frame(self.history_tab)
-        heading.grid(row=0, column=0, sticky="ew", pady=(0, 12))
-        ttk.Label(heading, text="Recent activity", style="Section.TLabel").pack(side="left")
-        ttk.Button(heading, text="Refresh", command=self._refresh_history).pack(side="right")
-        self.history_tree = ttk.Treeview(
-            self.history_tab, columns=("time", "tool"), show="headings", height=16,
-        )
-        self.history_tree.heading("time", text="Date and time")
-        self.history_tree.heading("tool", text="Tool")
-        self.history_tree.column("time", width=260, anchor="w")
-        self.history_tree.column("tool", width=420, anchor="w")
-        self.history_tree.grid(row=1, column=0, sticky="nsew")
-        self._refresh_history()
-
-    def _build_about_tab(self) -> None:
-        ttk = self.ttk
-        panel = ttk.Frame(self.about_tab, style="Panel.TFrame", padding=24)
-        panel.pack(fill="both", expand=True)
-        ttk.Label(panel, text="Phantom Sec", style="Section.TLabel").pack(anchor="w")
-        ttk.Label(panel, text=f"Version {__version__}", style="Muted.TLabel").pack(
-            anchor="w", pady=(4, 16))
-        copy = (
-            "A local-first toolkit for defensive security, responsible OSINT, "
-            "network diagnostics, and system administration.\n\n"
-            "Safety by design\n"
-            "• Built-in tools are designed to inspect, not alter, your system.\n"
-            "• No third-party module code is executed.\n"
-            "• Run tools only on devices and networks you own or are authorized to assess.\n\n"
-            "Privacy\n"
-            "• Run history is stored locally in your user profile.\n"
-            "• Reports may contain device details. Review them before sharing.\n"
-            "• This preview is not a complete security audit or a guarantee of security."
-        )
-        ttk.Label(panel, text=copy, style="Panel.TLabel", justify="left",
-                  wraplength=800).pack(anchor="w")
+    def _set_filter(self, value: str) -> None:
+        self.filter_value.set(value)
+        self._refresh_catalogue()
 
     def _refresh_catalogue(self) -> None:
+        if not hasattr(self, "tool_list") or self.current_view != "catalogue":
+            return
         self.tool_list.delete(0, "end")
-        self.selected_module = None
-        self.run_button.configure(state="disabled")
-        self.favorite_button.configure(state="disabled", text="☆ Add favourite")
-        self.detail_category.configure(text="TOOL DETAILS")
-        self.detail_title.configure(text="Choose a tool")
-        self.detail_id.configure(text="Select a tool from the library")
-        self.detail_description.configure(
-            text="Search by name, tool ID, or description. Select a result to see details."
-        )
-        self.input_value.set("")
-        self.input_label.configure(text="No input required")
-        self.input_entry.configure(state="disabled")
-        self.browse_button.configure(state="disabled")
-        selected_category = self.category_value.get()
-        self.visible_modules = search_modules(
-            self.search_value.get(),
-            "All tools" if selected_category == "★ Favourites" else selected_category,
-        )
-        if selected_category == "★ Favourites":
+        modules = search_modules(self.search_value.get())
+        mode = self.filter_value.get()
+        if mode == "FAVOURITES":
             saved = set(self.store.favorites())
-            self.visible_modules = [item for item in self.visible_modules if item.module_id in saved]
-        for module in self.visible_modules:
-            self.tool_list.insert("end", f"{module.name}   ·   {module.module_id}")
-        if not self.visible_modules:
+            modules = [item for item in modules if item.module_id in saved]
+        elif mode == "RECENT":
+            recent_ids = [row["module_id"] for row in self.store.history(100)]
+            rank = {module_id: index for index, module_id in enumerate(recent_ids)}
+            modules = [item for item in modules if item.module_id in rank]
+            modules.sort(key=lambda item: rank[item.module_id])
+        self.visible_modules = modules
+        for index, module in enumerate(modules, 1):
+            marker = "  ★" if self.store.is_favorite(module.module_id) else ""
+            self.tool_list.insert("end", f"[{index:02d}]  {module.name}{marker}")
+        if not modules:
             self.tool_list.insert("end", "No matching tools")
-        self.status_value.set(f"{len(self.visible_modules)} tools shown")
+        self.status_value.set(f"{len(modules)} TOOLS SHOWN  ·  {mode}")
 
-    def _on_tool_selected(self, _event: Any = None) -> None:
+    def _catalogue_selection(self, _event: Any = None) -> None:
+        selection = self.tool_list.curselection()
+        if selection and selection[0] < len(self.visible_modules):
+            self.status_value.set(f"SELECTED  ·  {self.visible_modules[selection[0]].module_id}")
+
+    def _open_selected(self, _event: Any = None) -> None:
         selection = self.tool_list.curselection()
         if not selection or selection[0] >= len(self.visible_modules):
             return
-        self.selected_module = self.visible_modules[selection[0]]
-        module = self.selected_module
-        self.detail_category.configure(text=module.category.upper())
-        self.detail_title.configure(text=module.name)
-        self.detail_id.configure(text=module.module_id)
-        self.detail_description.configure(text=module.description)
-        kind = input_kind(module.module_id)
-        self.input_value.set("")
-        if kind:
-            self.input_label.configure(text={
-                "path": "File / folder path",
-                "domain": "Public domain name",
-                "address": "IP address",
-                "network": "IP network (CIDR)",
-                "hostname": "Hostname",
-                "url": "HTTP or HTTPS URL",
-            }[kind])
-            self.input_entry.configure(state="normal")
-            self.browse_button.configure(state="normal" if kind == "path" else "disabled")
-        else:
-            self.input_label.configure(text="No input required")
-            self.input_entry.configure(state="disabled")
-            self.browse_button.configure(state="disabled")
-        self.run_button.configure(state="normal")
-        self._update_favorite_button()
-        self.status_value.set(f"Selected {module.module_id}")
+        self.open_tool(self.visible_modules[selection[0]])
 
-    def _update_favorite_button(self) -> None:
-        if not self.selected_module:
-            self.favorite_button.configure(state="disabled", text="☆ Add favourite")
-            return
-        saved = self.store.is_favorite(self.selected_module.module_id)
-        self.favorite_button.configure(
-            state="normal", text="★ Remove favourite" if saved else "☆ Add favourite")
+    def open_tool(self, module: Module) -> None:
+        tk, ttk = self.tk, self.ttk
+        self.selected_module = module
+        self.current_view = "tool"
+        self.input_value.set("")
+        self._clear_body()
+        self.body.columnconfigure(0, weight=1)
+        self.body.rowconfigure(5, weight=1)
+
+        top = ttk.Frame(self.body)
+        top.grid(row=0, column=0, sticky="ew")
+        ttk.Button(top, text="< BACK TO TOOL MENU",
+                   command=self.back_to_catalogue).pack(side="left")
+        ttk.Label(top, text="PHANTOM SEC", style="Muted.TLabel").pack(side="right")
+
+        title = module.name.upper()
+        ascii_title = f"==[ {title} ]=="
+        ttk.Label(self.body, text=ascii_title,
+                  font=("Cascadia Mono", 17, "bold"), foreground=WHITE).grid(
+                      row=1, column=0, pady=(28, 4))
+        ttk.Label(self.body, text=f"MODULE  ·  {module.module_id}",
+                  style="Muted.TLabel").grid(row=2, column=0)
+        ttk.Label(self.body, text=module.description, style="Muted.TLabel",
+                  wraplength=850, justify="center").grid(
+                      row=3, column=0, pady=(15, 20))
+
+        input_frame = ttk.Frame(self.body)
+        input_frame.grid(row=4, column=0, sticky="ew", pady=(0, 12))
+        input_frame.columnconfigure(1, weight=1)
+        kind = input_kind(module.module_id)
+        label = {
+            "path": "FILE / FOLDER PATH",
+            "domain": "DOMAIN NAME",
+            "address": "IP ADDRESS",
+            "network": "IP NETWORK / CIDR",
+            "hostname": "HOSTNAME",
+            "url": "WEBSITE URL",
+        }.get(kind, "INPUT")
+        ttk.Label(input_frame, text=f"{label}  >", style="Muted.TLabel").grid(
+            row=0, column=0, padx=(0, 10))
+        self.input_entry = ttk.Entry(input_frame, textvariable=self.input_value)
+        self.input_entry.grid(row=0, column=1, sticky="ew")
+        if kind is None:
+            self.input_entry.configure(state="disabled")
+        if kind == "path":
+            ttk.Button(input_frame, text="BROWSE",
+                       command=self._browse_path).grid(row=0, column=2, padx=(8, 0))
+
+        controls = ttk.Frame(self.body)
+        controls.grid(row=5, column=0, sticky="nsew")
+        controls.columnconfigure(0, weight=1)
+        controls.rowconfigure(2, weight=1)
+        action_row = ttk.Frame(controls)
+        action_row.grid(row=0, column=0, sticky="ew", pady=(0, 10))
+        self.run_button = ttk.Button(action_row, text="[ EXECUTE ]",
+                                     command=self.run_selected)
+        self.run_button.pack(side="left")
+        self.favorite_button = ttk.Button(
+            action_row, text="★ REMOVE FAVOURITE" if self.store.is_favorite(module.module_id)
+            else "☆ ADD FAVOURITE", command=self._toggle_favorite)
+        self.favorite_button.pack(side="left", padx=(8, 0))
+        ttk.Button(action_row, text="COPY OUTPUT", command=self._copy_result).pack(
+            side="left", padx=(8, 0))
+        ttk.Button(action_row, text="SAVE OUTPUT", command=self._export_output).pack(
+            side="left", padx=(8, 0))
+        ttk.Button(action_row, text="CLEAR", command=self._clear_result).pack(
+            side="left", padx=(8, 0))
+
+        ttk.Label(controls, text="OUTPUT TERMINAL", style="Muted.TLabel").grid(
+            row=1, column=0, sticky="w", pady=(5, 6))
+        output_frame = ttk.Frame(controls)
+        output_frame.grid(row=2, column=0, sticky="nsew")
+        output_frame.columnconfigure(0, weight=1)
+        output_frame.rowconfigure(0, weight=1)
+        self.output = tk.Text(
+            output_frame, wrap="word", bg=BLACK, fg=WHITE, insertbackground=WHITE,
+            selectbackground="#444444", relief="flat", highlightthickness=1,
+            highlightbackground="#444444", padx=12, pady=10,
+            font=("Cascadia Mono", 10),
+        )
+        self.output.grid(row=0, column=0, sticky="nsew")
+        output_scroll = ttk.Scrollbar(output_frame, orient="vertical", command=self.output.yview)
+        output_scroll.grid(row=0, column=1, sticky="ns")
+        self.output.configure(yscrollcommand=output_scroll.set)
+        self._set_output("Waiting for execution...\n")
+        self.status_value.set(f"READY  ·  {module.module_id}")
+        if kind:
+            self.input_entry.focus_set()
+
+    def back_to_catalogue(self) -> None:
+        if self.current_view == "tool":
+            self._show_catalogue()
 
     def _toggle_favorite(self) -> None:
         if not self.selected_module:
             return
         module_id = self.selected_module.module_id
-        self.store.set_favorite(module_id, not self.store.is_favorite(module_id))
-        self._update_favorite_button()
-        self._refresh_dashboard()
-        if self.category_value.get() == "★ Favourites":
-            self._refresh_catalogue()
-        self.status_value.set(
-            "Favourite updated" if self.store.is_favorite(module_id)
-            else "Favourite removed")
+        saved = self.store.is_favorite(module_id)
+        self.store.set_favorite(module_id, not saved)
+        self.favorite_button.configure(
+            text="☆ ADD FAVOURITE" if saved else "★ REMOVE FAVOURITE")
+        self.status_value.set("FAVOURITE REMOVED" if saved else "FAVOURITE SAVED")
 
     def _browse_path(self) -> None:
         from tkinter import filedialog
 
         if not self.selected_module:
             return
-        if self.selected_module.module_id in {"file.directory-size", "file.duplicate-finder", "system.disk"}:
+        module_id = self.selected_module.module_id
+        if module_id in {"file.directory-size", "file.duplicate-finder", "system.disk"}:
             chosen = filedialog.askdirectory()
         else:
             chosen = filedialog.askopenfilename()
@@ -453,26 +362,26 @@ class PhantomSecWindow:
             self.input_value.set(chosen)
 
     def run_selected(self) -> None:
-        if not self.selected_module:
+        if not self.selected_module or self.current_view != "tool":
             return
         module = self.selected_module
         kind = input_kind(module.module_id)
         value = self.input_value.get().strip()
         if kind and not value:
-            self.status_value.set(f"Enter a {kind} before running this tool.")
+            self.status_value.set(f"INPUT REQUIRED  ·  {kind.upper()}")
             self.input_entry.focus_set()
             return
         kwargs = {kind: value} if kind else {}
         self.run_button.configure(state="disabled")
-        self.status_value.set(f"Running {module.module_id}…")
-        self._set_output(f"Running {module.name}…")
+        self.status_value.set(f"RUNNING  ·  {module.module_id}")
+        self._set_output(f"> EXECUTING {module.name.upper()}...\n")
 
         def worker() -> None:
             try:
                 result = run_module(module.module_id, **kwargs)
                 self.store.record_run(module.module_id, result)
                 self.results.put(("success", result))
-            except Exception as exc:  # Keep unexpected tool errors inside the app.
+            except Exception as exc:
                 self.results.put(("error", f"{type(exc).__name__}: {exc}"))
 
         threading.Thread(target=worker, daemon=True).start()
@@ -481,15 +390,17 @@ class PhantomSecWindow:
         try:
             while True:
                 kind, payload = self.results.get_nowait()
-                self.run_button.configure(state="normal" if self.selected_module else "disabled")
-                if kind == "success":
-                    self._set_output(json.dumps(payload, indent=2, ensure_ascii=False, default=str))
-                    self.status_value.set("Tool completed successfully")
-                    self._refresh_history()
-                    self._refresh_dashboard()
-                else:
-                    self._set_output(f"Tool could not finish:\n{payload}")
-                    self.status_value.set("Tool returned an error")
+                if self.current_view == "tool" and self.selected_module:
+                    self.run_button.configure(state="normal")
+                    if kind == "success":
+                        self._set_output(json.dumps(
+                            payload, indent=2, ensure_ascii=False, default=str))
+                        self.status_value.set("EXECUTION COMPLETE")
+                    else:
+                        self._set_output(f"TOOL ERROR\n{payload}")
+                        self.status_value.set("EXECUTION FAILED")
+                elif kind == "success":
+                    self.status_value.set("TOOL COMPLETED")
         except queue.Empty:
             pass
         self.root.after(120, self._poll_results)
@@ -501,67 +412,28 @@ class PhantomSecWindow:
         self.output.configure(state="disabled")
 
     def _clear_result(self) -> None:
-        self._set_output("Results will appear here after you run a tool.")
-        self.status_value.set("Output cleared")
+        self._set_output("Waiting for execution...\n")
+        self.status_value.set("OUTPUT CLEARED")
 
     def _copy_result(self) -> None:
         value = self.output.get("1.0", "end-1c")
         self.root.clipboard_clear()
         self.root.clipboard_append(value)
-        self.status_value.set("Output copied to clipboard")
-
-    def _refresh_history(self) -> None:
-        if not hasattr(self, "history_tree"):
-            return
-        for item in self.history_tree.get_children():
-            self.history_tree.delete(item)
-        for row in self.store.history(100):
-            timestamp = row["created_at"].replace("T", " ").replace("+00:00", " UTC")
-            self.history_tree.insert("", "end", values=(timestamp, row["module_id"]))
-
+        self.status_value.set("OUTPUT COPIED")
 
     def _export_output(self) -> None:
-        from tkinter import filedialog, messagebox
+        from tkinter import filedialog
 
-        raw = self.output.get("1.0", "end-1c")
-        try:
-            payload = json.loads(raw)
-        except json.JSONDecodeError:
-            messagebox.showinfo("Nothing to export", "Run a tool first to create JSON output.")
+        if not hasattr(self, "output"):
             return
         destination = filedialog.asksaveasfilename(
-            title="Export tool result",
-            defaultextension=".json",
-            filetypes=[("JSON files", "*.json"), ("All files", "*.*")],
-            initialfile="phantom-sec-result.json",
+            defaultextension=".txt",
+            filetypes=[("Text files", "*.txt"), ("JSON files", "*.json")],
+            title="Save Phantom Sec output",
         )
-        if not destination:
-            return
-        try:
-            with open(destination, "w", encoding="utf-8") as stream:
-                json.dump(payload, stream, indent=2, ensure_ascii=False, default=str)
-                stream.write("\n")
-        except OSError as exc:
-            messagebox.showerror("Export failed", str(exc))
-            return
-        self.status_value.set(f"JSON exported to {destination}")
-
-
-def launch_gui() -> int:
-    """Start the native desktop application."""
-    try:
-        import tkinter as tk
-    except ImportError as exc:
-        raise RuntimeError(
-            "The desktop interface needs Tk support. Install your Python distribution's Tk package."
-        ) from exc
-    try:
-        root = tk.Tk()
-        PhantomSecWindow(root)
-        root.mainloop()
-    except tk.TclError as exc:
-        raise RuntimeError(
-            "The desktop window could not start. Check that a graphical desktop session is available."
-        ) from exc
-    return 0
+        if destination:
+            from pathlib import Path
+            Path(destination).write_text(
+                self.output.get("1.0", "end-1c"), encoding="utf-8")
+            self.status_value.set("OUTPUT SAVED")
 
