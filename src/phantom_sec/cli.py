@@ -96,6 +96,12 @@ def interactive_menu() -> None:
             kwargs["address"] = Prompt.ask("IP address")
         elif module.module_id.startswith("domain."):
             kwargs["domain"] = Prompt.ask("Public domain name (example: example.com)")
+        elif module.module_id == "network.subnet-calculator":
+            kwargs["network"] = Prompt.ask("IP network in CIDR notation (example: 192.168.1.0/24)")
+        elif module.module_id in {"web.url-analyzer", "web.security-headers"}:
+            kwargs["url"] = Prompt.ask("HTTP or HTTPS URL")
+        elif module.module_id == "web.tls-inspector":
+            kwargs["hostname"] = Prompt.ask("Hostname (example: example.com)")
         try:
             result = run_module(choice, **kwargs)
             Store().record_run(choice, result)
