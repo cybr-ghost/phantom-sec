@@ -407,24 +407,6 @@ class PhantomSecWindow:
             self.history_tree.insert("", "end", values=(timestamp, row["module_id"]))
 
 
-def launch_gui() -> int:
-    """Start the native desktop application."""
-    try:
-        import tkinter as tk
-    except ImportError as exc:
-        raise RuntimeError(
-            "The desktop interface needs Tk support. Install your Python distribution's Tk package."
-        ) from exc
-    try:
-        root = tk.Tk()
-        PhantomSecWindow(root)
-        root.mainloop()
-    except tk.TclError as exc:
-        raise RuntimeError(
-            "The desktop window could not start. Check that a graphical desktop session is available."
-        ) from exc
-    return 0
-
     def _export_output(self) -> None:
         from tkinter import filedialog, messagebox
 
@@ -470,29 +452,3 @@ def launch_gui() -> int:
         ) from exc
     return 0
 
-
-    def _export_output(self) -> None:
-        from tkinter import filedialog, messagebox
-
-        raw = self.output.get("1.0", "end-1c")
-        try:
-            payload = json.loads(raw)
-        except json.JSONDecodeError:
-            messagebox.showinfo("Nothing to export", "Run a tool first to create JSON output.")
-            return
-        destination = filedialog.asksaveasfilename(
-            title="Export tool result",
-            defaultextension=".json",
-            filetypes=[("JSON files", "*.json"), ("All files", "*.*")],
-            initialfile="phantom-sec-result.json",
-        )
-        if not destination:
-            return
-        try:
-            with open(destination, "w", encoding="utf-8") as stream:
-                json.dump(payload, stream, indent=2, ensure_ascii=False, default=str)
-                stream.write("\n")
-        except OSError as exc:
-            messagebox.showerror("Export failed", str(exc))
-            return
-        self.status_value.set(f"JSON exported to {destination}")
