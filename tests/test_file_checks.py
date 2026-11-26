@@ -1,3 +1,5 @@
+import zipfile
+
 import pytest
 
 from phantom_sec.modules import get_modules, run_module
@@ -51,3 +53,43 @@ def test_duplicate_finder_rejects_file_path(tmp_path):
 def test_new_file_tools_are_registered():
     ids = {module.module_id for module in get_modules()}
     assert {"file.type-signature", "file.text-profile", "file.duplicate-finder"} <= ids
+
+
+
+def test_archive_inspector_lists_zip_without_extracting_and_flags_traversal(tmp_path):
+    archive_path = tmp_path / "sample.zip"
+    with zipfile.ZipFile(archive_path, "w") as archive:
+        archive.writestr("docs/readme.txt", "safe")
+        archive.writestr("../outside.txt", "not extracted")
+    result = run_module("file.archive-inspector", path=str(archive_path))["result"]
+    assert result["archive_format"] == "ZIP"
+    assert result["entries_found"] == 2
+    assert result["unsafe_path_entries"] == 1
+    assert any(item["unsafe_path"] for item in result["entries"])
+    assert not (tmp_path.parent / "outside.txt").exists()
+
+
+def test_archive_inspector_rejects_non_archive(tmp_path):
+    target = tmp_path / "notes.txt"
+    target.write_text("not an archive", encoding="utf-8")
+    with pytest.raises(ValueError, match="supported ZIP or TAR"):
+        run_module("file.archive-inspector", path=str(target))
+
+
+def test_file_entropy_profile_reports_constant_file_as_low_entropy(tmp_path):
+    target = tmp_path / "repeated.bin"
+    target.write_bytes(b"A" * 2048)
+    result = run_module("file.entropy-profile", path=str(target))["result"]
+    assert result["bytes_sampled"] == 2048
+    assert result["shannon_entropy_bits_per_byte"] == 0.0
+    assert result["interpretation"] == "low byte diversity"
+
+
+def test_file_entropy_profile_rejects_directory(tmp_path):
+    with pytest.raises(ValueError, match="regular file"):
+        run_module("file.entropy-profile", path=str(tmp_path))
+
+
+def test_new_archive_and_entropy_tools_are_registered():
+    ids = {module.module_id for module in get_modules()}
+    assert {"file.archive-inspector", "file.entropy-profile"} <= ids
