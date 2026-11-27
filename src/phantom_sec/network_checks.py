@@ -32,3 +32,38 @@ def reverse_dns(address: str | None = None, **_: Any) -> dict[str, Any]:
         raise ValueError(f"Reverse DNS lookup failed: {exc}") from exc
     return {"address": address, "hostname": hostname, "aliases": aliases,
             "address_family": "IPv6" if family == socket.AF_INET6 else "IPv4"}
+
+
+
+def local_addresses(**_: Any) -> dict[str, Any]:
+    """List IP addresses returned for this computer's own hostname only."""
+    hostname = socket.gethostname()
+    try:
+        records = socket.getaddrinfo(hostname, None, type=socket.SOCK_STREAM)
+    except socket.gaierror as exc:
+        raise ValueError(f"Could not resolve local addresses: {exc}") from exc
+    found: dict[tuple[int, str], dict[str, str]] = {}
+    for family, _, _, _, sockaddr in records:
+        if family not in (socket.AF_INET, socket.AF_INET6):
+            continue
+        address = sockaddr[0]
+        version = "IPv6" if family == socket.AF_INET6 else "IPv4"
+        found[(family, address)] = {
+            "address": address,
+            "family": version,
+            "scope": "loopback" if ip_is_loopback(address) else "local interface",
+        }
+    addresses = sorted(found.values(), key=lambda item: (item["family"], item["address"]))
+    return {
+        "hostname": hostname,
+        "addresses": addresses,
+        "address_count": len(addresses),
+        "note": "Only the local computer hostname is resolved. No remote hosts are scanned.",
+    }
+
+
+def ip_is_loopback(address: str) -> bool:
+    """Return whether an IP address is in a loopback range."""
+    import ipaddress
+
+    return ipaddress.ip_address(address).is_loopback
