@@ -270,3 +270,128 @@ def file_entropy_profile(path: str | None = None, **_: Any) -> dict[str, Any]:
         "interpretation": interpretation,
         "note": "Entropy is a statistical property, not a malware verdict. Compression, encryption, and many legitimate file formats can all produce high entropy.",
     }
+
+
+
+def find_large_files(path: str | None = None, minimum_bytes: int = 100 * 1024 * 1024,
+                     **_: Any) -> dict[str, Any]:
+    """Find large regular files in a directory without opening or changing file contents."""
+    if not path:
+        raise ValueError("Provide --path to a directory.")
+    if not isinstance(minimum_bytes, int) or minimum_bytes < 1:
+        raise ValueError("minimum_bytes must be a positive integer.")
+    root = Path(path).expanduser()
+    if root.is_symlink() or not root.is_dir():
+        raise ValueError("Provide a directory, not a file or symbolic link.")
+    maximum_files = 10000
+    maximum_results = 1000
+    scanned = skipped = 0
+    matches: list[dict[str, Any]] = []
+    truncated = False
+    for item in root.rglob("*"):
+        if item.is_symlink() or not item.is_file():
+            continue
+        if scanned + skipped >= maximum_files:
+            truncated = True
+            break
+        try:
+            size = item.stat().st_size
+            scanned += 1
+            if size >= minimum_bytes:
+                matches.append({"path": str(item), "size_bytes": size})
+                if len(matches) >= maximum_results:
+                    truncated = True
+                    break
+        except OSError:
+            skipped += 1
+    matches.sort(key=lambda entry: entry["size_bytes"], reverse=True)
+    return {
+        "directory": str(root.resolve()),
+        "minimum_bytes": minimum_bytes,
+        "files_scanned": scanned,
+        "large_files_found": len(matches),
+        "files": matches,
+        "skipped_files": skipped,
+        "scan_limit_reached": truncated,
+        "note": "Read-only filename and size scan. File contents are not opened or changed.",
+    }
+
+
+def find_empty_files(path: str | None = None, **_: Any) -> dict[str, Any]:
+    """Find zero-byte regular files in a directory without modifying them."""
+    if not path:
+        raise ValueError("Provide --path to a directory.")
+    root = Path(path).expanduser()
+    if root.is_symlink() or not root.is_dir():
+        raise ValueError("Provide a directory, not a file or symbolic link.")
+    maximum_files = 10000
+    maximum_results = 1000
+    scanned = skipped = 0
+    empty_paths: list[str] = []
+    truncated = False
+    for item in root.rglob("*"):
+        if item.is_symlink() or not item.is_file():
+            continue
+        if scanned + skipped >= maximum_files or len(empty_paths) >= maximum_results:
+            truncated = True
+            break
+        try:
+            scanned += 1
+            if item.stat().st_size == 0:
+                empty_paths.append(str(item))
+        except OSError:
+            skipped += 1
+    return {
+        "directory": str(root.resolve()),
+        "files_scanned": scanned,
+        "empty_files_found": len(empty_paths),
+        "files": empty_paths,
+        "skipped_files": skipped,
+        "scan_limit_reached": truncated,
+        "note": "Read-only scan. Empty files are not automatically deleted.",
+    }
+
+
+def check_file_extension(path: str | None = None, **_: Any) -> dict[str, Any]:
+    """Compare a small set of common file extensions with their leading-byte signatures."""
+    if not path:
+        raise ValueError("Provide --path to a regular file.")
+    target = Path(path).expanduser()
+    if target.is_symlink() or not target.is_file():
+        raise ValueError("Provide a regular file, not a folder or symbolic link.")
+    try:
+        with target.open("rb") as stream:
+            header = stream.read(32)
+    except OSError as exc:
+        raise ValueError(f"Could not read the file: {exc}") from exc
+    signatures = (
+        (b"\x7fELF", {"", ".elf", ".so"}, "ELF executable or shared object"),
+        (b"MZ", {".exe", ".dll", ".sys"}, "Windows PE/DOS executable signature"),
+        (b"\x89PNG\r\n\x1a\n", {".png"}, "PNG image"),
+        (b"\xff\xd8\xff", {".jpg", ".jpeg"}, "JPEG image"),
+        (b"GIF87a", {".gif"}, "GIF image"),
+        (b"GIF89a", {".gif"}, "GIF image"),
+        (b"%PDF-", {".pdf"}, "PDF document"),
+        (b"PK\x03\x04", {".zip", ".docx", ".xlsx", ".pptx", ".jar", ".apk"},
+         "ZIP-based archive signature"),
+        (b"SQLite format 3\x00", {".sqlite", ".sqlite3", ".db"}, "SQLite database"),
+    )
+    detected = next(
+        ((label, extensions) for signature, extensions, label in signatures
+         if header.startswith(signature)),
+        None,
+    )
+    extension = target.suffix.lower()
+    if detected is None:
+        status = "unknown_signature"
+        detected_type = "Unknown signature"
+    else:
+        detected_type, expected_extensions = detected
+        status = "match" if extension in expected_extensions else "extension_mismatch"
+    return {
+        "path": str(target.resolve()),
+        "extension": extension or "(none)",
+        "detected_type": detected_type,
+        "status": status,
+        "note": "A signature mismatch is only a clue. This check does not prove a file is malicious or fully validate its format.",
+    }
