@@ -38,6 +38,18 @@ from phantom_sec.file_checks import (
     text_file_profile,
 )
 from phantom_sec.network_checks import interfaces, local_addresses, reverse_dns
+from phantom_sec.privacy_checks import (
+    audit_email_auth_headers,
+    audit_hosts_file,
+    audit_proxy_configuration,
+    check_email_address,
+    check_phone_number_format,
+    classify_ip_privacy,
+    inspect_email_tracking_pixels,
+    inventory_email_attachments,
+    inventory_local_listening_ports,
+    lookup_phone_country_code,
+)
 from phantom_sec.web_checks import (
     analyze_url,
     audit_security_headers,
@@ -393,6 +405,16 @@ _MODULES = (
     Module("domain.rdap", "Domain registration lookup", "Domain intelligence", "Retrieve public RDAP registration events, status and nameservers.", domain_registration),
     Module("domain.certificate-transparency", "Certificate transparency search", "Domain intelligence", "Find publicly logged TLS certificates for a domain and its subdomains.", certificate_transparency_search),
     Module("domain.email-posture", "Email domain posture", "Domain intelligence", "Review public MX, SPF, and DMARC DNS configuration for an email domain.", email_domain_posture),
+    Module("privacy.email-syntax", "Email address syntax check", "Privacy tools", "Check an email address format without verifying ownership.", check_email_address),
+    Module("privacy.email-auth-headers", "Email authentication header audit", "Privacy tools", "Extract SPF, DKIM, and DMARC verdicts from pasted message headers.", audit_email_auth_headers),
+    Module("privacy.email-tracking-pixels", "Email tracking pixel detector", "Privacy tools", "Find tiny or hidden images in a saved HTML email without contacting them.", inspect_email_tracking_pixels),
+    Module("privacy.email-attachments", "Email attachment inventory", "Privacy tools", "List attachment types and sizes in a saved EML file without extracting them.", inventory_email_attachments),
+    Module("privacy.phone-format", "Phone number format check", "Privacy tools", "Validate basic international number formatting without identifying a subscriber.", check_phone_number_format),
+    Module("privacy.phone-country-code", "Phone calling code lookup", "Privacy tools", "Identify the broad region represented by an international calling code.", lookup_phone_country_code),
+    Module("privacy.ip-classifier", "IP privacy classifier", "Privacy tools", "Classify an IP address as private, public, loopback, or special-purpose without geolocation.", classify_ip_privacy),
+    Module("privacy.hosts-audit", "Hosts file audit", "Privacy tools", "Review non-loopback hosts-file overrides without modifying the file.", audit_hosts_file),
+    Module("privacy.proxy-audit", "Proxy configuration audit", "Privacy tools", "Check whether common proxy variables are configured without exposing their values.", audit_proxy_configuration),
+    Module("network.listening-ports", "Local listening ports", "Network diagnostics", "List local Linux TCP listeners without probing remote systems or mapping processes.", inventory_local_listening_ports),
 )
 
 
