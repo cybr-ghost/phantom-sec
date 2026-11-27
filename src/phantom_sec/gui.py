@@ -4,7 +4,7 @@ The catalogue and individual tool sessions share one window. Built-in tools run
 through their registered handlers; the input box is a tool parameter, not a shell.
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa: I001
 
 import json
 import queue
