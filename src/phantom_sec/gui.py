@@ -6,10 +6,11 @@ through their registered handlers; the input box is a tool parameter, not a shel
 
 from __future__ import annotations
 
+from typing import Any
+
 import json
 import queue
 import threading
-from typing import Any
 
 from phantom_sec import __version__
 from phantom_sec.local_history import Store
