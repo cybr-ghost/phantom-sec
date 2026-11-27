@@ -93,3 +93,38 @@ def test_file_entropy_profile_rejects_directory(tmp_path):
 def test_new_archive_and_entropy_tools_are_registered():
     ids = {module.module_id for module in get_modules()}
     assert {"file.archive-inspector", "file.entropy-profile"} <= ids
+
+
+
+def test_large_file_finder_reports_files_over_threshold(tmp_path):
+    (tmp_path / "large.bin").write_bytes(b"x" * 20)
+    (tmp_path / "small.bin").write_bytes(b"x")
+    result = run_module("file.large-file-finder", path=str(tmp_path), minimum_bytes=10)["result"]
+    assert result["large_files_found"] == 1
+    assert result["files"][0]["path"].endswith("large.bin")
+
+
+def test_empty_file_finder_reports_zero_byte_files(tmp_path):
+    (tmp_path / "empty.txt").write_bytes(b"")
+    (tmp_path / "filled.txt").write_text("data", encoding="utf-8")
+    result = run_module("file.empty-file-finder", path=str(tmp_path))["result"]
+    assert result["empty_files_found"] == 1
+    assert result["files"][0].endswith("empty.txt")
+
+
+def test_extension_check_detects_mismatch_without_execution(tmp_path):
+    target = tmp_path / "image.exe"
+    target.write_bytes(b"\x89PNG\r\n\x1a\n" + b"payload")
+    result = run_module("file.extension-check", path=str(target))["result"]
+    assert result["status"] == "extension_mismatch"
+    assert result["detected_type"] == "PNG image"
+
+
+def test_extension_check_rejects_directory(tmp_path):
+    with pytest.raises(ValueError, match="regular file"):
+        run_module("file.extension-check", path=str(tmp_path))
+
+
+def test_new_file_audit_tools_are_registered():
+    ids = {module.module_id for module in get_modules()}
+    assert {"file.large-file-finder", "file.empty-file-finder", "file.extension-check"} <= ids
