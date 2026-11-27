@@ -30,11 +30,14 @@ from phantom_sec.domain_checks import (
 from phantom_sec.file_checks import (
     detect_file_type,
     file_entropy_profile,
+    find_empty_files,
+    find_large_files,
+    check_file_extension,
     find_duplicate_files,
     inspect_archive,
     text_file_profile,
 )
-from phantom_sec.network_checks import interfaces, reverse_dns
+from phantom_sec.network_checks import interfaces, local_addresses, reverse_dns
 from phantom_sec.web_checks import (
     analyze_url,
     audit_security_headers,
@@ -375,7 +378,11 @@ _MODULES = (
     Module("file.duplicate-finder", "Duplicate file finder", "File analysis", "Find byte-identical files in a selected folder without modifying anything.", find_duplicate_files),
     Module("file.archive-inspector", "Archive inspector", "File analysis", "Review ZIP and TAR contents and flag unsafe paths without extracting files.", inspect_archive),
     Module("file.entropy-profile", "File entropy profile", "File analysis", "Measure byte entropy for a local file without displaying its contents.", file_entropy_profile),
+    Module("file.large-file-finder", "Large file finder", "File analysis", "Find large files by size without reading their contents.", find_large_files),
+    Module("file.empty-file-finder", "Empty file finder", "File analysis", "Find zero-byte files without deleting them.", find_empty_files),
+    Module("file.extension-check", "File extension check", "File analysis", "Compare common file extensions with their leading-byte signatures.", check_file_extension),
     Module("network.interfaces", "Network interfaces", "Network diagnostics", "List local network interface names.", interfaces),
+    Module("network.local-addresses", "Local IP addresses", "Network diagnostics", "List IP addresses resolved for this computer only.", local_addresses),
     Module("network.dns", "DNS lookup", "Network diagnostics", "Resolve a hostname with the system resolver.", dns_lookup),
     Module("network.reverse-dns", "Reverse DNS", "Network diagnostics", "Look up the PTR hostname for an IP address.", reverse_dns),
     Module("network.subnet-calculator", "Subnet calculator", "Network intelligence", "Calculate network ranges and address boundaries locally.", calculate_subnet),
