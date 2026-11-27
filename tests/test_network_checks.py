@@ -13,3 +13,13 @@ def test_reverse_dns_rejects_invalid_address():
         assert "valid IPv4 or IPv6" in str(exc)
     else:
         raise AssertionError("Expected ValueError")
+
+
+
+def test_local_addresses_only_reports_ip_address_records():
+    from phantom_sec.network_checks import local_addresses
+
+    result = local_addresses()
+    assert isinstance(result["addresses"], list)
+    assert result["hostname"]
+    assert all(item["family"] in {"IPv4", "IPv6"} for item in result["addresses"])
