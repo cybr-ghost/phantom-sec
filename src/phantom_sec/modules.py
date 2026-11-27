@@ -28,12 +28,12 @@ from phantom_sec.domain_checks import (
     inspect_dns_records,
 )
 from phantom_sec.file_checks import (
+    check_file_extension,
     detect_file_type,
     file_entropy_profile,
+    find_duplicate_files,
     find_empty_files,
     find_large_files,
-    check_file_extension,
-    find_duplicate_files,
     inspect_archive,
     text_file_profile,
 )
